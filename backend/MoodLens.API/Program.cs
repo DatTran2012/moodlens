@@ -61,15 +61,26 @@ builder.Services.AddSwaggerGen(options =>
 });
 #endregion
 
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowAll", policy =>
+//    {
+//        policy
+//            //.WithOrigins("http://localhost:5173", "http://192.168.1.50:5173", "https://gurgling-annotate-superjet.ngrok-free.dev")
+//            .AllowAnyHeader()
+//            .AllowAnyMethod()
+//            .AllowCredentials();
+//    });
+//});
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
         policy
-            //.WithOrigins("http://localhost:5173", "http://192.168.1.50:5173", "https://gurgling-annotate-superjet.ngrok-free.dev")
+            .AllowAnyOrigin()
             .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
+            .AllowAnyMethod();
     });
 });
 //Authen    
