@@ -79,7 +79,7 @@ builder.Services.AddCors(options =>
     {
         policy
             .WithOrigins(
-                "https://moodlens-qbfadeyg0-thor-connnn-s-projects.vercel.app/"
+                "https://moodlens-mauve.vercel.app/"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
