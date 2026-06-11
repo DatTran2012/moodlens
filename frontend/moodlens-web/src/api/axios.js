@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "https://localhost:7266/api", // đổi theo backend của bạn
-    // baseURL: "https://gurgling-annotate-superjet.ngrok-free.dev/api",
+    // baseURL: "https://localhost:7266/api", // đổi theo backend của bạn
+    baseURL: "https://moodlens-1-7ja8.onrender.com/api",
 });
 
 // attach token
