@@ -7,7 +7,7 @@ public class OllamaAiService : IOllamaAiService
 {
     private readonly HttpClient _http;
     private const string BaseUrl = "http://localhost:11434";
-    private const string Model = "gemma4";
+    private const string Model = "gemma4:e4b";
 
     public OllamaAiService(HttpClient http)
     {

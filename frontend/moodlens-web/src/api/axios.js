@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    // baseURL: "https://localhost:7266/api", // đổi theo backend của bạn
-    baseURL: "https://moodlens-rka0.onrender.com/api",
+    baseURL: import.meta.env.VITE_API_URL
 });
 
 // attach token
