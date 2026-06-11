@@ -63,10 +63,10 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReact", policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173", "http://192.168.1.50:5173", "https://gurgling-annotate-superjet.ngrok-free.dev")
+            //.WithOrigins("http://localhost:5173", "http://192.168.1.50:5173", "https://gurgling-annotate-superjet.ngrok-free.dev")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -111,7 +111,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors("AllowReact");
+app.UseCors("AllowAll");
 //JWT
 app.UseAuthentication();
 app.UseAuthorization();
