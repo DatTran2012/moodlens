@@ -7,28 +7,27 @@ import { BsPlus, BsPencil, BsTrash3, BsPinAngle, BsPinAngleFill, BsSend } from "
 const suggestions = [
     "Tại sao tôi hay stress?",
     "Điều gì làm tôi hạnh phúc nhất?",
-    "Nỗi buồn gần đây của tôi là gì?",
     "Cảm xúc của tôi đang cải thiện không?",
     "Tôi nên tập trung vào điều gì?",
 ];
 
 const insightConfig = [
-    { key: "happy",   emoji: "😊", label: "Vui",         color: "text-green-400"  },
-    { key: "stress",  emoji: "😰", label: "Căng thẳng",  color: "text-yellow-400" },
-    { key: "sad",     emoji: "😢", label: "Buồn",        color: "text-blue-400"   },
-    { key: "neutral", emoji: "😐", label: "Ổn định",     color: "text-purple-400" },
+    { key: "happy", emoji: "😊", label: "Vui", color: "text-green-400" },
+    { key: "stress", emoji: "😰", label: "Căng thẳng", color: "text-yellow-400" },
+    { key: "sad", emoji: "😢", label: "Buồn", color: "text-blue-400" },
+    { key: "neutral", emoji: "😐", label: "Ổn định", color: "text-purple-400" },
 ];
 
 export default function AiCoach() {
-    const [question, setQuestion]           = useState("");
-    const [loading, setLoading]             = useState(false);
+    const [question, setQuestion] = useState("");
+    const [loading, setLoading] = useState(false);
     const [conversationId, setConversationId] = useState(null);
     const [conversations, setConversations] = useState([]);
-    const [messages, setMessages]           = useState([{
+    const [messages, setMessages] = useState([{
         role: "assistant",
         content: "Xin chào 👋 Tôi là AI Coach của MoodLens. Hãy hỏi tôi bất kỳ điều gì về cảm xúc của bạn."
     }]);
-    const [insight, setInsight]             = useState(null);
+    const [insight, setInsight] = useState(null);
     const bottomRef = useRef(null);
 
     useEffect(() => { loadInsight(); loadConversations(); }, []);
@@ -159,7 +158,7 @@ export default function AiCoach() {
                     <div className="px-4 py-3 border-b border-white/5 flex flex-wrap gap-2">
                         {suggestions.map(q => (
                             <button key={q} onClick={() => setQuestion(q)}
-                                    className="text-xs px-3 py-1.5 rounded-full bg-white/5
+                                className="text-xs px-3 py-1.5 rounded-full bg-white/5
                                                hover:bg-white/10 border border-white/8
                                                text-gray-400 hover:text-white transition">
                                 {q}
@@ -181,8 +180,8 @@ export default function AiCoach() {
                                 <div className={`max-w-[78%] rounded-2xl px-4 py-3 text-sm
                                                 leading-relaxed whitespace-pre-wrap
                                                 ${msg.role === "user"
-                                                    ? "bg-blue-600 text-white rounded-tr-sm"
-                                                    : "bg-white/8 text-gray-200 rounded-tl-sm"}`}>
+                                        ? "bg-blue-600 text-white rounded-tr-sm"
+                                        : "bg-white/8 text-gray-200 rounded-tl-sm"}`}>
                                     {msg.content}
                                 </div>
                                 {msg.role === "user" && (
@@ -202,10 +201,10 @@ export default function AiCoach() {
                                 </div>
                                 <div className="bg-white/8 rounded-2xl rounded-tl-sm px-4 py-3">
                                     <div className="flex gap-1.5 items-center h-5">
-                                        {[0,1,2].map(i => (
+                                        {[0, 1, 2].map(i => (
                                             <div key={i}
-                                                 className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
-                                                 style={{ animationDelay: `${i * 0.15}s` }} />
+                                                className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+                                                style={{ animationDelay: `${i * 0.15}s` }} />
                                         ))}
                                     </div>
                                 </div>
@@ -263,15 +262,15 @@ export default function AiCoach() {
                             {conversations.length === 0
                                 ? <p className="text-gray-600 text-xs text-center py-4">
                                     Chưa có cuộc trò chuyện nào
-                                  </p>
+                                </p>
                                 : conversations.map(c => (
                                     <div key={c.id}
-                                         onClick={() => openConversation(c.id)}
-                                         className={`flex items-center gap-2 px-3 py-2.5 rounded-xl
+                                        onClick={() => openConversation(c.id)}
+                                        className={`flex items-center gap-2 px-3 py-2.5 rounded-xl
                                                      cursor-pointer transition group
                                                      ${conversationId === c.id
-                                                         ? "bg-blue-600/20 border border-blue-500/30"
-                                                         : "hover:bg-white/5 border border-transparent"}`}>
+                                                ? "bg-blue-600/20 border border-blue-500/30"
+                                                : "hover:bg-white/5 border border-transparent"}`}>
 
                                         {c.isPinned && <BsPinAngleFill size={11} className="text-yellow-400 shrink-0" />}
 
@@ -286,15 +285,15 @@ export default function AiCoach() {
                                         {/* Actions — chỉ hiện khi hover */}
                                         <div className="hidden group-hover:flex gap-1 shrink-0">
                                             <button onClick={e => { e.stopPropagation(); renameConversation(c.id, c.title); }}
-                                                    className="p-1 text-gray-500 hover:text-white transition rounded">
+                                                className="p-1 text-gray-500 hover:text-white transition rounded">
                                                 <BsPencil size={11} />
                                             </button>
                                             <button onClick={e => { e.stopPropagation(); togglePin(c.id); }}
-                                                    className="p-1 text-gray-500 hover:text-yellow-400 transition rounded">
+                                                className="p-1 text-gray-500 hover:text-yellow-400 transition rounded">
                                                 {c.isPinned ? <BsPinAngleFill size={11} /> : <BsPinAngle size={11} />}
                                             </button>
                                             <button onClick={e => { e.stopPropagation(); deleteConversation(c.id); }}
-                                                    className="p-1 text-gray-500 hover:text-red-400 transition rounded">
+                                                className="p-1 text-gray-500 hover:text-red-400 transition rounded">
                                                 <BsTrash3 size={11} />
                                             </button>
                                         </div>
@@ -324,11 +323,10 @@ export default function AiCoach() {
                                             <span className={`text-sm font-semibold ${color}`}>{val}</span>
                                         </div>
                                         <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                            <div className={`h-full rounded-full transition-all duration-500 ${
-                                                key === "happy"   ? "bg-green-500"  :
-                                                key === "stress"  ? "bg-yellow-500" :
-                                                key === "sad"     ? "bg-blue-500"   : "bg-purple-500"
-                                            }`} style={{ width: `${pct}%` }} />
+                                            <div className={`h-full rounded-full transition-all duration-500 ${key === "happy" ? "bg-green-500" :
+                                                key === "stress" ? "bg-yellow-500" :
+                                                    key === "sad" ? "bg-blue-500" : "bg-purple-500"
+                                                }`} style={{ width: `${pct}%` }} />
                                         </div>
                                     </div>
                                 );
