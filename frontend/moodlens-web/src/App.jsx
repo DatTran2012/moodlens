@@ -37,11 +37,7 @@ function App() {
         {/* <Route path="/" element={<Login />} /> */}
         <Route
           path="/"
-          element={
-            localStorage.getItem("welcomeCompleted")
-              ? <Login />
-              : <Navigate to="/welcome" />
-          }
+          element={<Login />}
         />
 
         {/* SAU LOGIN → CÓ SIDEBAR */}

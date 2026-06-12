@@ -1,775 +1,420 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-import { BsJournalBookmarkFill, BsJournalRichtext } from 'react-icons/bs';
 import toast from "react-hot-toast";
+import { BsPencilFill, BsStars, BsJournalPlus, BsXLg } from "react-icons/bs";
+
+const DRAFT_KEY = "moodlens_journal_draft";
+
+const moodConfig = {
+    happy: { emoji: "😊", text: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/30", bar: "bg-green-500" },
+    sad: { emoji: "😢", text: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/30", bar: "bg-blue-500" },
+    stress: { emoji: "😰", text: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/30", bar: "bg-yellow-500" },
+    anxious: { emoji: "😰", text: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/30", bar: "bg-yellow-500" },
+    angry: { emoji: "😠", text: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30", bar: "bg-red-500" },
+    neutral: { emoji: "😐", text: "text-gray-300", bg: "bg-gray-500/10", border: "border-gray-500/30", bar: "bg-gray-500" },
+};
+
+const getMood = (mood) =>
+    moodConfig[(mood || "").toLowerCase()] || moodConfig.neutral;
+
+const moodRanges = [
+    { min: 0, max: 20, label: "Buồn", color: "bg-blue-500", emoji: "😢" },
+    { min: 21, max: 50, label: "Căng thẳng", color: "bg-yellow-500", emoji: "😰" },
+    { min: 51, max: 80, label: "Ổn định", color: "bg-gray-400", emoji: "😐" },
+    { min: 80, max: 100, label: "Vui", color: "bg-green-500", emoji: "😊" },
+];
+
+const today = () =>
+    new Date().toLocaleDateString("vi-VN", {
+        weekday: "long", year: "numeric", month: "long", day: "numeric"
+    });
+
+const SkeletonCard = () => (
+    <div className="animate-pulse space-y-3">
+        <div className="h-4 bg-slate-700 rounded" />
+        <div className="h-4 bg-slate-700 rounded w-5/6" />
+        <div className="h-4 bg-slate-700 rounded w-4/6" />
+    </div>
+);
 
 export default function Journal() {
-
     const [content, setContent] = useState("");
-    const DRAFT_KEY = "moodlens_journal_draft";
     const [loading, setLoading] = useState(false);
-    const [selectedJournal, setSelectedJournal] = useState(null);
-    const [showModal, setShowModal] = useState(false);
-    const [detailLoading, setDetailLoading] = useState(false);
+    const [result, setResult] = useState(null);
+    const [displaySummary, setDisplay] = useState("");
+    const [recentJournals, setRecent] = useState([]);
+    const [selectedJournal, setSelected] = useState(null);
+    const [detailLoading, setDetailLoad] = useState(false);
+    const [wordCount, setWordCount] = useState(0);
 
-    const [result, setResult] = useState({
-        mood: "",
-        score: 0,
-        summary: ""
-    });
-    const [recentJournals, setRecentJournals] = useState([]);
-
+    // Load draft
     useEffect(() => {
-        loadRecentJournals();
+        const draft = localStorage.getItem(DRAFT_KEY);
+        if (draft) setContent(draft);
+        loadRecent();
     }, []);
+
+    // Save draft
     useEffect(() => {
-
-        const draft =
-            localStorage.getItem(DRAFT_KEY);
-
-        if (draft)
-            setContent(draft);
-
-    }, []);
-    useEffect(() => {
-
-        localStorage.setItem(
-            DRAFT_KEY,
-            content
-        );
-
+        localStorage.setItem(DRAFT_KEY, content);
+        setWordCount(content.trim() ? content.trim().split(/\s+/).length : 0);
     }, [content]);
-    const openJournalDetail = async (id) => {
 
-        try {
-
-            setShowModal(true);
-            setDetailLoading(true);
-
-            const response =
-                await api.get(`/journal/${id}`);
-
-            setSelectedJournal(response.data);
-
-        }
-        catch (err) {
-
-            console.error(err);
-
-        }
-        finally {
-
-            setDetailLoading(false);
-
-        }
-    };
-    const loadRecentJournals = async () => {
-
-        try {
-
-            const response =
-                await api.get("/journal/history?page=1&pageSize=3");
-
-            setRecentJournals(
-
-                response.data.data || []
-            );
-
-        }
-        catch (err) {
-
-            console.error(err);
-
-        }
-
-    };
-    const getMoodStyle = (mood) => {
-        switch ((mood || "").toLowerCase()) {
-            case "happy":
-                return {
-                    text: "text-green-400",
-                    bg: "bg-green-500/10",
-                    border: "border-green-500/30"
-                };
-
-            case "sad":
-                return {
-                    text: "text-blue-400",
-                    bg: "bg-blue-500/10",
-                    border: "border-blue-500/30"
-                };
-
-            case "angry":
-                return {
-                    text: "text-red-400",
-                    bg: "bg-red-500/10",
-                    border: "border-red-500/30"
-                };
-
-            case "anxious":
-                return {
-                    text: "text-yellow-400",
-                    bg: "bg-yellow-500/10",
-                    border: "border-yellow-500/30"
-                };
-
-            default:
-                return {
-                    text: "text-gray-300",
-                    bg: "bg-gray-500/10",
-                    border: "border-gray-500/30"
-                };
-        }
-    };
-
-    const moodStyle = getMoodStyle(result.mood);
-    const [displaySummary, setDisplaySummary] = useState("");
-    // typing effect
+    // Typing effect cho AI summary
     useEffect(() => {
+        if (!result?.summary) return;
+        let i = 0;
+        setDisplay("");
+        const iv = setInterval(() => {
+            i++;
+            setDisplay(result.summary.slice(0, i));
+            if (i >= result.summary.length) clearInterval(iv);
+        }, 18);
+        return () => clearInterval(iv);
+    }, [result?.summary]);
 
-        if (!result.summary)
-            return;
+    const loadRecent = async () => {
+        try {
+            const res = await api.get("/journal/history?page=1&pageSize=3");
+            setRecent(res.data.data || []);
+        } catch (e) { console.error(e); }
+    };
 
-        let index = 0;
-
-        setDisplaySummary("");
-
-        const interval = setInterval(() => {
-
-            index++;
-
-            setDisplaySummary(
-                result.summary.slice(0, index)
-            );
-
-            if (index >= result.summary.length)
-                clearInterval(interval);
-
-        }, 20);
-
-        return () => clearInterval(interval);
-
-    }, [result.summary]);
-    const isMobile =
-        window.innerWidth < 768;
-    const handleKeyDown = async (e) => {
-        if (isMobile)
-            return;
-        if (window.innerWidth < 768)
-            return;
-        // Shift + Enter => xuống dòng
-        if (e.shiftKey && e.key === "Enter") {
-            return;
-        }
-
-        // Enter => submit
-        if (e.key === "Enter") {
-
-            e.preventDefault();
-
-            if (!content.trim())
-                return;
-
-            if (loading)
-                return;
-
-            await handleAnalyze();
+    const openDetail = async (id) => {
+        setSelected({ _loading: true });
+        setDetailLoad(true);
+        try {
+            const res = await api.get(`/journal/${id}`);
+            setSelected(res.data);
+        } catch (e) {
+            console.error(e);
+            setSelected(null);
+        } finally {
+            setDetailLoad(false);
         }
     };
+
     const handleAnalyze = async () => {
-
-        if (!content.trim())
-            return;
-
+        if (!content.trim() || loading) return;
         try {
-
             setLoading(true);
-            setResult({
-                mood: "",
-                score: 0,
-                summary: ""
-            });
-
-            const response = await api.post("/journal", {
-                content
-            });
-
-            setResult({
-                mood: response.data.mood,
-                score: response.data.score,
-                summary: response.data.summary,
-            });
-            localStorage.removeItem(
-                DRAFT_KEY
-            );
-
-            await loadRecentJournals();
-
-            toast.success(
-                "Phân tích cảm xúc thành công"
-            );
-        }
-        catch (err) {
-
-            console.error(err);
-            toast.error(
-                "Không thể phân tích cảm xúc"
-            );
-
-        }
-        finally {
+            setResult(null);
+            const res = await api.post("/journal", { content });
+            setResult({ mood: res.data.mood, score: res.data.score, summary: res.data.summary });
+            localStorage.removeItem(DRAFT_KEY);
+            await loadRecent();
+            toast.success("Đã lưu & phân tích cảm xúc 🎉");
+        } catch {
+            toast.error("Không thể phân tích cảm xúc");
+        } finally {
             setLoading(false);
         }
     };
-    const getMoodEmoji = (mood) => {
 
-        switch ((mood || "").toLowerCase()) {
-
-            case "happy":
-                return "😊";
-
-            case "sad":
-                return "😢";
-
-            case "angry":
-                return "😠";
-
-            case "anxious":
-                return "😰";
-
-            default:
-                return "😐";
-        }
-    };
-    const getMoodInfo = (mood) => {
-
-        switch ((mood || "").toLowerCase()) {
-
-            case "happy":
-                return {
-                    emoji: "😊",
-                    textColor: "text-green-400",
-                    bgColor: "bg-green-500/10",
-                    borderColor: "border-green-500/30"
-                };
-
-            case "sad":
-                return {
-                    emoji: "😢",
-                    textColor: "text-blue-400",
-                    bgColor: "bg-blue-500/10",
-                    borderColor: "border-blue-500/30"
-                };
-
-            case "stress":
-            case "anxious":
-                return {
-                    emoji: "😰",
-                    textColor: "text-yellow-400",
-                    bgColor: "bg-yellow-500/10",
-                    borderColor: "border-yellow-500/30"
-                };
-
-            case "angry":
-                return {
-                    emoji: "😠",
-                    textColor: "text-red-400",
-                    bgColor: "bg-red-500/10",
-                    borderColor: "border-red-500/30"
-                };
-
-            default:
-                return {
-                    emoji: "😐",
-                    textColor: "text-gray-300",
-                    bgColor: "bg-gray-500/10",
-                    borderColor: "border-gray-500/30"
-                };
-        }
-    };
-    const moodRanges = [
-        {
-            min: 0,
-            max: 20,
-            label: "Sad",
-            color: "bg-blue-500",
-            emoji: "😢",
-            description: "Buồn bã, tiêu cực"
-        },
-        {
-            min: 21,
-            max: 50,
-            label: "Stress",
-            color: "bg-yellow-500",
-            emoji: "😰",
-            description: "Áp lực, căng thẳng"
-        },
-        {
-            min: 51,
-            max: 80,
-            label: "Neutral",
-            color: "bg-gray-400",
-            emoji: "😐",
-            description: "Ổn định"
-        },
-        {
-            min: 80,
-            max: 100,
-            label: "Happy",
-            color: "bg-green-500",
-            emoji: "😊",
-            description: "Tích cực"
-        },
-    ];
-    const getScoreColor = (mood) => {
-        switch ((mood || "").toLowerCase()) {
-            case "happy":
-                return "bg-green-500";
-
-            case "sad":
-                return "bg-blue-500";
-
-            case "angry":
-                return "bg-red-500";
-
-            case "anxious":
-                return "bg-yellow-500";
-
-            default:
-                return "bg-gray-500";
-        }
+    // Trang mới: xoá nội dung + kết quả AI
+    const handleNewPage = () => {
+        if (content.trim() && !window.confirm("Bắt đầu trang mới? Nội dung hiện tại sẽ bị xoá."))
+            return;
+        setContent("");
+        setResult(null);
+        setDisplay("");
+        localStorage.removeItem(DRAFT_KEY);
     };
 
-    const SkeletonCard = () => (
-        <div className="animate-pulse">
+    const handleKeyDown = (e) => {
+        if (window.innerWidth < 768) return;
+        if (e.shiftKey && e.key === "Enter") return;
+        if (e.key === "Enter") { e.preventDefault(); handleAnalyze(); }
+    };
 
-            <div className="h-5 bg-slate-700 rounded w-32 mb-4" />
+    const mood = result ? getMood(result.mood) : null;
 
-            <div className="space-y-3">
-
-                <div className="h-4 bg-slate-700 rounded" />
-
-                <div className="h-4 bg-slate-700 rounded w-5/6" />
-
-                <div className="h-4 bg-slate-700 rounded w-4/6" />
-
-            </div>
-
-        </div>
-    );
-    const EmptyState = () => (
-        <div className="text-center py-10">
-
-            <div className="text-5xl mb-3">
-                📝
-            </div>
-
-            <h3 className="font-semibold">
-                Chưa có nhật ký nào
-            </h3>
-
-            <p className="text-gray-400 mt-2">
-                Hãy viết cảm xúc đầu tiên của bạn.
-            </p>
-
-        </div>
-    );
-    const moodInfo =
-        selectedJournal
-            ? getMoodInfo(selectedJournal.mood)
-            : null;
     return (
-        <div className="p-4 md:p-6">
+        <div className="min-h-screen bg-gray-950 text-white p-4 md:p-8">
 
-            <div className="mb-6">
-                <h1 className="text-3xl font-bold">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <BsJournalBookmarkFill color="#4A90E2" size={30} />
-                        <p>Nhật kí hôm nay</p>
+            {/* ── HEADER ── */}
+            <div className="flex items-start justify-between mb-8">
+                <div>
+                    <div className="flex items-center gap-3 mb-1">
+                        <BsPencilFill className="text-blue-400" size={22} />
+                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+                            Nhật kí của tôi
+                        </h1>
                     </div>
-                </h1>
+                    <p className="text-gray-500 text-sm ml-9 capitalize">{today()}</p>
+                </div>
 
-                <p className="text-gray-400 mt-2">
-                    Viết nhật ký và để AI phân tích cảm xúc của bạn.
-                </p>
+                {/* Nút Trang mới — icon tờ giấy + dấu + = bắt đầu trang mới */}
+                <button
+                    onClick={handleNewPage}
+                    title="Trang mới — xoá và bắt đầu lại"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl
+                               bg-white/5 hover:bg-white/10 border border-white/10
+                               text-gray-300 hover:text-white transition text-sm font-medium"
+                >
+                    <BsJournalPlus size={18} />
+                    <span className="hidden sm:inline">Trang mới</span>
+                </button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                {/* LEFT */}
-                <div className="bg-slate-900 rounded-xl p-5">
+                {/* ── LEFT: EDITOR ── */}
+                <div>
+                    {/* Tờ nhật kí */}
+                    <div className="relative bg-[#1a1f2e] rounded-2xl border border-white/8
+                                    shadow-xl overflow-hidden">
 
-                    <h2 className="font-semibold mb-4">
-                        Nhật ký hôm nay
-                    </h2>
+                        {/* Gáy sổ bên trái */}
+                        <div className="absolute left-0 top-0 bottom-0 w-1
+                                        bg-gradient-to-b from-blue-500/60 via-blue-400/40 to-blue-500/60
+                                        rounded-l-2xl" />
 
-                    <textarea
-                        value={content}
-                        disabled={loading}
-                        onChange={(e) => setContent(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder="Hôm nay của bạn thế nào?"
-                        className="
-                            w-full
-                           h-[250px] md:h-[350px]
-                            resize-none
-                            rounded-lg
-                            bg-slate-800
-                            p-4
-                            outline-none
-                        "
-                    />
-
-                    <button
-                        onClick={handleAnalyze}
-                        disabled={loading}
-                        disabled:opacity-50
-disabled:cursor-not-allowed
-                        className="
-        mt-4
-        w-full
-        bg-blue-600
-        hover:bg-blue-700
-        py-3
-        rounded-lg
-        font-medium
-        disabled:opacity-50
-    "
-                    >
-                        {loading
-                            ? "Đang phân tích..."
-                            : "Phân tích cảm xúc"}
-                    </button>
-
-                    {/* RECENT JOURNALS */}
-
-                    <div className="mt-6">
-
-                        <h3 className="font-semibold mb-4">
-                            Nhật ký gần đây
-                        </h3>
-
-                        {
-                            recentJournals.length === 0
-                                ? <EmptyState />
-                                : (
-                                    <div className="space-y-3 max-h-[250px] overflow-y-auto">
-
-                                        {
-                                            recentJournals.slice(0, 3).map(journal => (
-
-                                                <div
-                                                    key={journal.id}
-                                                    onClick={() => openJournalDetail(journal.id)}
-                                                    className="
-                                    bg-slate-800
-                                    rounded-lg
-                                    p-3
-                                    hover:bg-slate-700
-                                    cursor-pointer
-                                    transition
-                                "
-                                                >
-
-                                                    <div className="text-sm text-gray-300">
-
-                                                        {
-                                                            journal.content.length > 60
-                                                                ? journal.content.substring(0, 60) + "..."
-                                                                : journal.content
-                                                        }
-
-                                                    </div>
-
-                                                    <div className="text-xs text-gray-500 mt-2">
-
-                                                        {
-                                                            new Date(
-                                                                journal.createdAt
-                                                            ).toLocaleDateString("vi-VN")
-                                                        }
-
-                                                    </div>
-
-                                                </div>
-
-                                            ))
-                                        }
-
-                                    </div>
-                                )
-                        }
-
-                    </div>
-                </div>
-
-                {/* RIGHT */}
-                <div className="space-y-4">
-
-                    {/* Mood */}
-                    <div
-                        className={`
-        rounded-xl
-        p-5
-        border
-        ${moodStyle.bg}
-        ${moodStyle.border}
-    `}
-                    >
-                        <h3 className="text-gray-400 mb-2">
-                            Cảm xúc
-                        </h3>
-                        <div className={`text-2xl font-bold ${moodStyle.text}`}>
-
-                            {getMoodEmoji(result.mood)}
-                            {" "}
-                            {result.mood || ""}
-
-                        </div>
-
-                    </div>
-
-                    {/* Score */}
-                    <div className="bg-slate-900 rounded-xl p-5">
-
-                        <h3 className="text-gray-400 mb-2">
-                            Điểm số cảm xúc
-                        </h3>
-
-                        <div className="text-2xl font-bold mb-3">
-                            {result.score || 0}
-                        </div>
-
-                        <div
-                            className={`
-        h-3
-        rounded-full
-        transition-all
-        duration-700
-        ${getScoreColor(result.mood)}
-    `}
+                        {/* Đường kẻ trang giấy */}
+                        <div className="absolute inset-0 pointer-events-none"
                             style={{
-                                width: `${result.score || 0}%`
-                            }}
-                        />
-                        <div className="relative mt-6">
+                                backgroundImage: "repeating-linear-gradient(transparent, transparent 31px, rgba(255,255,255,0.03) 31px, rgba(255,255,255,0.03) 32px)",
+                                backgroundPositionY: "48px"
+                            }} />
 
-                            <div className="flex h-4 rounded-full overflow-hidden">
-
-                                {moodRanges.map((range) => (
-
-                                    <div
-                                        key={range.label}
-                                        title={`${range.label}
-${range.min}-${range.max}
-${range.description}`}
-                                        className={`${range.color} flex-1`}
-                                    />
-
-                                ))}
-
+                        <div className="relative p-6 pl-8">
+                            {/* Ngày trên đầu trang */}
+                            <div className="text-xs text-blue-400/70 font-medium mb-4 tracking-wide">
+                                📅 {today()}
                             </div>
 
-                            {/* Marker hiện tại */}
-                            <div
-                                className="
-            absolute
-            top-[-6px]
-            w-4
-            h-7
-            bg-white
-            rounded-full
-            shadow
-            border-2
-            border-black
-        "
-                                style={{
-                                    left: `calc(${result.score}% - 8px)`
-                                }}
+                            <textarea
+                                value={content}
+                                disabled={loading}
+                                onChange={(e) => setContent(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                placeholder={"Hôm nay bạn cảm thấy thế nào?\n\nHãy viết tự do — không có gì là đúng hay sai..."}
+                                className="w-full h-[300px] md:h-[380px] resize-none bg-transparent
+                                           outline-none text-gray-100 leading-8 text-[15px]
+                                           placeholder:text-gray-600 placeholder:leading-8"
+                                style={{ fontFamily: "'Georgia', serif" }}
                             />
 
+                            {/* Word count + hint */}
+                            <div className="flex items-center justify-between mt-2 text-xs text-gray-600">
+                                <span>{wordCount} từ</span>
+                                <span className="hidden sm:inline">
+                                    Enter để phân tích · Shift+Enter xuống dòng
+                                </span>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Summary */}
-                    <div className="bg-slate-900 rounded-xl p-5 min-h-[250px]">
+                    {/* Nút phân tích */}
+                    <button
+                        onClick={handleAnalyze}
+                        disabled={loading || !content.trim()}
+                        className="mt-4 w-full flex items-center justify-center gap-2
+                                   bg-blue-600 hover:bg-blue-700 disabled:opacity-40
+                                   disabled:cursor-not-allowed py-3 rounded-xl
+                                   font-semibold transition text-sm"
+                    >
+                        <BsStars size={16} />
+                        {loading ? "Đang phân tích..." : "Phân tích cảm xúc"}
+                    </button>
 
-                        <h3 className="text-gray-400 mb-4 flex items-center gap-2">
-                            🤖 AI phân tích
+                    {/* Nhật kí gần đây */}
+                    <div className="mt-6">
+                        <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">
+                            Gần đây
                         </h3>
-
-                        {loading ? (
-                            <SkeletonCard />
-                        ) : (
-                            <p className="leading-7 whitespace-pre-wrap">
-                                {displaySummary}
-                            </p>
-                        )}
-
+                        {recentJournals.length === 0
+                            ? <p className="text-gray-600 text-sm text-center py-6">Chưa có nhật kí nào</p>
+                            : (
+                                <div className="space-y-2">
+                                    {recentJournals.map(j => {
+                                        const m = getMood(j.mood);
+                                        return (
+                                            <div
+                                                key={j.id}
+                                                onClick={() => openDetail(j.id)}
+                                                className={`flex items-start gap-3 p-3 rounded-xl
+                                                            border cursor-pointer transition hover:brightness-110
+                                                            ${m.bg} ${m.border}`}
+                                            >
+                                                <span className="text-lg mt-0.5">{m.emoji}</span>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm text-gray-300 truncate">
+                                                        {j.content.length > 70
+                                                            ? j.content.slice(0, 70) + "..."
+                                                            : j.content}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        {new Date(j.createdAt).toLocaleDateString("vi-VN")}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )
+                        }
                     </div>
-
                 </div>
 
-            </div>
-            {
-                showModal && (
-                    <div
-                        className="
-                fixed
-                inset-0
-                bg-black/60
-                backdrop-blur-sm
-                z-50
-                flex
-                items-center
-                justify-center
-                p-4
-            "
-                    >
+                {/* ── RIGHT: KẾT QUẢ AI ── */}
+                <div className="space-y-4">
 
-                        <div
-                            className="
-                    bg-slate-900
-                    rounded-2xl
-                    w-full
-                    max-w-3xl
-                    max-h-[85vh]
-                    overflow-y-auto
-                    p-6
-                "
-                        >
-
-                            <div className="flex justify-between mb-4">
-
-                                <h2 className="text-xl font-bold">
-                                    📖 Chi tiết nhật ký
-                                </h2>
-
-                                <button
-                                    onClick={() => {
-                                        setShowModal(false);
-                                        setSelectedJournal(null);
-                                    }}
-                                    className="text-gray-400 hover:text-white"
-                                >
-                                    ✕
-                                </button>
-
+                    {/* Cảm xúc */}
+                    <div className={`rounded-2xl p-5 border transition-all duration-500
+                                    ${mood ? `${mood.bg} ${mood.border}` : "bg-slate-900 border-white/5"}`}>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Cảm xúc</p>
+                        {result
+                            ? <div className={`text-2xl font-bold flex items-center gap-2 ${mood.text}`}>
+                                <span>{mood.emoji}</span>
+                                <span className="capitalize">{result.mood}</span>
                             </div>
+                            : <p className="text-gray-600 text-sm">Chưa có kết quả</p>
+                        }
+                    </div>
 
-                            {
-                                detailLoading
-                                    ? (
-                                        <SkeletonCard />
-                                    )
-                                    : selectedJournal && (
-                                        <>
-                                            <div className="mb-4">
-
-                                                <h3 className="text-gray-400 mb-2">
-                                                    Nhật ký
-                                                </h3>
-
-                                                <div className="bg-slate-800 rounded-lg p-4 whitespace-pre-wrap">
-                                                    {selectedJournal.content}
-                                                </div>
-
-                                            </div>
-
-                                            <div className="grid md:grid-cols-2 gap-4">
-
-                                                <div
-                                                    className={`
-        rounded-lg
-        p-4
-        border
-        ${moodInfo?.bgColor}
-        ${moodInfo?.borderColor}
-    `}
-                                                >
-
-                                                    <div className="text-gray-400 mb-2">
-                                                        Cảm xúc
-                                                    </div>
-
-                                                    <div
-                                                        className={`
-            text-xl
-            font-bold
-            flex
-            items-center
-            gap-2
-            ${moodInfo?.textColor}
-        `}
-                                                    >
-
-                                                        <span>
-                                                            {moodInfo?.emoji}
-                                                        </span>
-
-                                                        <span>
-                                                            {selectedJournal.mood}
-                                                            <div className="mt-2 text-sm text-gray-400">
-
-                                                                {
-                                                                    selectedJournal.score >= 80
-                                                                        ? "Tâm trạng rất tích cực"
-                                                                        : selectedJournal.score >= 50
-                                                                            ? "Tâm trạng ổn định"
-                                                                            : "Cần quan tâm nhiều hơn đến cảm xúc"
-                                                                }
-
-                                                            </div>
-                                                        </span>
-
-                                                    </div>
-
-                                                </div>
-
-                                                <div
-                                                    className={`
-        rounded-lg
-        p-4
-        border
-        ${moodInfo?.bgColor}
-        ${moodInfo?.borderColor}
-    `}
-                                                >
-
-                                                    <div className="text-gray-400 mb-2">
-                                                        Điểm số
-                                                    </div>
-
-                                                    <div className="text-xl font-bold">
-                                                        {selectedJournal.score}
-                                                    </div>
-
-                                                </div>
-
-                                            </div>
-
-                                            <div className="mt-4">
-
-                                                <h3 className="text-gray-400 mb-2">
-                                                    🤖 AI Summary
-                                                </h3>
-
-                                                <div className="bg-slate-800 rounded-lg p-4 whitespace-pre-wrap">
-                                                    {selectedJournal.summary}
-                                                </div>
-
-                                            </div>
-                                        </>
-                                    )
-                            }
-
+                    {/* Điểm số */}
+                    <div className="bg-slate-900 rounded-2xl p-5 border border-white/5">
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">
+                            Điểm cảm xúc
+                        </p>
+                        <div className="text-3xl font-bold mb-4">
+                            {result ? result.score : <span className="text-gray-700">—</span>}
                         </div>
 
+                        {/* Thanh màu */}
+                        <div className="relative">
+                            <div className="flex h-3 rounded-full overflow-hidden">
+                                {moodRanges.map(r => (
+                                    <div key={r.label}
+                                        title={`${r.emoji} ${r.label} (${r.min}–${r.max})`}
+                                        className={`${r.color} flex-1`} />
+                                ))}
+                            </div>
+                            {result && (
+                                <div className="absolute top-[-5px] w-5 h-5 bg-white rounded-full
+                                                shadow-lg border-2 border-gray-900 transition-all duration-700"
+                                    style={{ left: `calc(${result.score}% - 10px)` }} />
+                            )}
+                        </div>
+
+                        {/* Labels */}
+                        <div className="flex justify-between text-xs text-gray-600 mt-2">
+                            {moodRanges.map(r => (
+                                <span key={r.label}>{r.emoji}</span>
+                            ))}
+                        </div>
                     </div>
-                )
-            }
+
+                    {/* AI Summary */}
+                    <div className="bg-slate-900 rounded-2xl p-5 border border-white/5 min-h-[200px]">
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <BsStars className="text-yellow-400" />
+                            AI phân tích
+                        </p>
+                        {loading
+                            ? <SkeletonCard />
+                            : result
+                                ? <p className="text-gray-200 leading-7 whitespace-pre-wrap text-[14px]">
+                                    {displaySummary}
+                                </p>
+                                : <p className="text-gray-600 text-sm">
+                                    Viết nhật kí và bấm phân tích để AI đọc cảm xúc của bạn ✨
+                                </p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            {/* ── MODAL CHI TIẾT ── */}
+            {selectedJournal && (
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50
+                                flex items-center justify-center p-4"
+                     onClick={() => setSelected(null)}>
+                    <div className="w-full max-w-xl"
+                         onClick={e => e.stopPropagation()}>
+
+                        {detailLoading ? (
+                            <div className="bg-slate-900 rounded-2xl border border-white/10 p-6">
+                                <SkeletonCard />
+                            </div>
+                        ) : selectedJournal && !selectedJournal._loading && (() => {
+                            const m = getMood(selectedJournal.mood);
+                            return (
+                                <div className="bg-[#1a1f2e] rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+
+                                    {/* Gáy sổ trên màu theo mood */}
+                                    <div className={`h-1 w-full ${m.bar} opacity-70`} />
+
+                                    <div className="p-6">
+                                        {/* Header */}
+                                        <div className="flex items-start justify-between mb-5">
+                                            <div>
+                                                <div className={`flex items-center gap-2 text-sm font-semibold ${m.text}`}>
+                                                    <span>{m.emoji}</span>
+                                                    <span className="capitalize">{selectedJournal.mood}</span>
+                                                    <span className="text-gray-600 font-normal">·</span>
+                                                    <span className="text-gray-500 font-normal">
+                                                        {new Date(selectedJournal.createdAt).toLocaleDateString("vi-VN", {
+                                                            weekday: "short", day: "numeric", month: "short"
+                                                        })}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xs text-gray-600 mt-1">
+                                                    🕒 {new Date(selectedJournal.createdAt).toLocaleTimeString("vi-VN", {
+                                                        hour: "2-digit", minute: "2-digit"
+                                                    })}
+                                                </p>
+                                            </div>
+                                            <button onClick={() => setSelected(null)}
+                                                    className="text-gray-500 hover:text-white transition">
+                                                <BsXLg size={14} />
+                                            </button>
+                                        </div>
+
+                                        {/* Trang giấy */}
+                                        <div className="relative bg-slate-900/60 rounded-xl p-5 mb-4
+                                                        border border-white/5 max-h-[200px] overflow-y-auto"
+                                             style={{
+                                                 backgroundImage: "repeating-linear-gradient(transparent,transparent 27px,rgba(255,255,255,0.025) 27px,rgba(255,255,255,0.025) 28px)",
+                                                 backgroundPositionY: "12px"
+                                             }}>
+                                            <p className="text-gray-200 leading-7 whitespace-pre-wrap text-sm"
+                                               style={{ fontFamily: "'Georgia', serif" }}>
+                                                {selectedJournal.content}
+                                            </p>
+                                        </div>
+
+                                        {/* Score bar */}
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <span className="text-xs text-gray-500 shrink-0">Điểm</span>
+                                            <span className={`text-base font-bold shrink-0 ${m.text}`}>
+                                                {selectedJournal.score}
+                                            </span>
+                                            <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                                <div className={`h-full rounded-full ${m.bar}`}
+                                                     style={{ width: `${selectedJournal.score}%` }} />
+                                            </div>
+                                        </div>
+
+                                        {/* AI Summary */}
+                                        {selectedJournal.summary && (
+                                            <div className="bg-slate-800/60 rounded-xl p-4 border border-white/5">
+                                                <p className="text-xs text-yellow-400 font-semibold mb-2 flex items-center gap-1.5">
+                                                    <BsStars size={11} /> AI phân tích
+                                                </p>
+                                                <p className="text-sm text-gray-400 leading-6">
+                                                    {selectedJournal.summary}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })()}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
-
-

@@ -61,31 +61,31 @@ builder.Services.AddSwaggerGen(options =>
 });
 #endregion
 
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowAll", policy =>
-//    {
-//        policy
-//            //.WithOrigins("http://localhost:5173", "http://192.168.1.50:5173", "https://gurgling-annotate-superjet.ngrok-free.dev")
-//            .AllowAnyHeader()
-//            .AllowAnyMethod()
-//            .AllowCredentials();
-//    });
-//});
-
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
+    options.AddPolicy("AllowReact", policy =>
     {
         policy
-            .WithOrigins(
-                "https://moodlens-mauve.vercel.app/"
-            )
+            .WithOrigins("http://localhost:5173", "http://192.168.1.50:5173")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
     });
 });
+
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowFrontend", policy =>
+//    {
+//        policy
+//            .WithOrigins(
+//                "https://moodlens-mauve.vercel.app/"
+//            )
+//            .AllowAnyHeader()
+//            .AllowAnyMethod()
+//            .AllowCredentials();
+//    });
+//});
 //Authen    
 builder.Services.AddScoped<IAuthService, AuthService>();
 
@@ -120,12 +120,12 @@ builder.Services.AddDbContext<MoodLensDbContext>(options =>
 
 var app = builder.Build();
 
-//if (app.Environment.IsDevelopment())
-//{
+if (app.Environment.IsDevelopment())
+{
     app.UseSwagger();
     app.UseSwaggerUI();
-//}
-app.UseCors("AllowFrontend");
+}
+app.UseCors("AllowReact");
 //JWT
 app.UseAuthentication();
 app.UseAuthorization();

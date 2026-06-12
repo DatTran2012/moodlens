@@ -136,13 +136,30 @@ public class JournalController : ControllerBase
         if (!string.IsNullOrEmpty(search))
             query = query.Where(x => x.Content.Contains(search));
 
+        //if (date.HasValue)
+        //{
+
+        //    var d = DateTime.SpecifyKind(date.Value.Date,DateTimeKind.Utc);
+        //    query = query.Where(x => x.CreatedAt.Date == d);
+        //}
         if (date.HasValue)
         {
-            var d = date.Value.Date;
-            query = query.Where(x => x.CreatedAt.Date == d);
+            var startDate = DateTime.SpecifyKind(
+                date.Value.Date,
+                DateTimeKind.Utc);
+
+            var endDate = startDate.AddDays(1);
+
+            // PostgreSQL không dịch được .Date trong LINQ
+            // Dùng >= và < thay vì .Date ==
+            query = query.Where(x =>
+                x.CreatedAt >= startDate &&
+                x.CreatedAt < endDate);
         }
 
         query = query.OrderByDescending(x => x.CreatedAt);
+
+        //query = query.OrderByDescending(x => x.CreatedAt);
 
         var total = await query.CountAsync();
 
