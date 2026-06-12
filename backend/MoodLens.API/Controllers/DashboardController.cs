@@ -65,13 +65,14 @@ public class DashboardController : ControllerBase
         var weeklyCount = journals.Count(x => x.CreatedAt >= weekStart);
 
         var trend = journals
-            .OrderBy(x => x.CreatedAt)
-            .Select(x => new MoodTrendDto
-            {
-                Date = x.CreatedAt.ToString("dd/MM"),
-                Score = x.MoodAnalysis.Score
-            })
-            .ToList();
+    .OrderBy(x => x.CreatedAt)
+    .Select(x => new MoodTrendDto
+    {
+        Date = x.CreatedAt.ToString("dd/MM HH:mm"),
+        Score = x.MoodAnalysis.Score
+    })
+    .Take(20)
+    .ToList();
 
         var distribution = journals
             .GroupBy(x => x.MoodAnalysis.Mood)
@@ -97,18 +98,20 @@ public class DashboardController : ControllerBase
             .ToList();
 
         var calendar = journals
-            .GroupBy(x => x.CreatedAt.Date)
-            .Select(g => g
-                .OrderByDescending(x => x.CreatedAt)
-                .First())
-            .Select(x => new MoodCalendarDto
-            {
-                Date = x.CreatedAt.Date,
-                Mood = x.MoodAnalysis.Mood,
-                Score = x.MoodAnalysis.Score
-            })
-            .OrderBy(x => x.Date)
-            .ToList();
+    .GroupBy(x => x.CreatedAt.Date)
+    .Select(g => g
+        .OrderByDescending(x => x.CreatedAt)
+        .First())
+    .Select(x => new MoodCalendarDto
+    {
+        Date = x.CreatedAt.Date,
+        Mood = x.MoodAnalysis.Mood,
+        Score = x.MoodAnalysis.Score
+    })
+    .OrderByDescending(x => x.Date)
+    .Take(30)
+    .OrderBy(x => x.Date)
+    .ToList();
 
         // Tìm Insight của tuần hiện tại
         var weeklyInsight = await _context.WeeklyInsights

@@ -7,11 +7,10 @@ public class OllamaAiService : IOllamaAiService
 {
     private readonly HttpClient _http;
     private const string BaseUrl = "http://localhost:11434";
-    private const string Model = "llama3.1:latest";
-    //private const string Model = "qwen3.5:4b";
-    //private const string Model = "gemma4:e4b";
+    private const string Model_Chat = "gemma4:e2b";
+    private const string Model_Analyic = "gemma4:e4b";
+
     //private const string Model = "gemma4:31b-cloud";
-    //private const string Model = "qwen3.5:0.8b";
 
 
     public OllamaAiService(HttpClient http)
@@ -25,11 +24,11 @@ public class OllamaAiService : IOllamaAiService
     {
         var request = new
         {
-            model = Model,
+            model = Model_Analyic,
             prompt = prompt,
             stream = false
         };
-
+        Console.WriteLine("Model call:" + Model_Analyic.ToString());
         var response = await _http.PostAsJsonAsync(
             $"{BaseUrl}/api/generate",
             request
@@ -51,11 +50,11 @@ public class OllamaAiService : IOllamaAiService
     {
         var request = new
         {
-            model = Model,
+            model = Model_Chat,
             messages = messages,
             stream = false
         };
-
+        Console.WriteLine("Model call:" + Model_Chat.ToString());
         var response = await _http.PostAsJsonAsync(
             $"{BaseUrl}/api/chat",
             request
@@ -94,7 +93,7 @@ Quy tắc:
 
 Yêu cầu Summary:
 
-- Tối đa 120 từ.
+- Tối đa 200 từ.
 - Thể hiện sự đồng cảm.
 - Tóm tắt ngắn gọn nguyên nhân cảm xúc.
 - Đưa ra 1 lời khuyên thực tế hoặc tích cực nếu phù hợp.
@@ -140,9 +139,24 @@ Nêu 1-2 nguyên nhân có thể ảnh hưởng đến cảm xúc.
 Viết bằng tiếng Việt tự nhiên, thân thiện.
 Không dùng markdown.
 Không dùng bullet list.
-Độ dài tối đa 100 từ.
+Độ dài tối đa 200 từ.
 
-Chỉ trả về phần nhận xét cuối cùng để hiển thị cho người dùng.";
+Chỉ trả về phần nhận xét cuối cùng để hiển thị cho người dùng.
+
+Bạn chỉ được phép hỗ trợ:
+
+- cảm xúc
+- tâm trạng
+- nhật ký
+- sức khỏe tinh thần
+
+Nếu câu hỏi không liên quan đến các chủ đề trên:
+
+Hãy trả lời chính xác:
+
+""Tôi là AI Coach của MoodLens và chỉ hỗ trợ các vấn đề liên quan đến cảm xúc, tâm trạng và nhật ký cá nhân.""
+
+";
 
         return await AskOllama(prompt);
     }
@@ -159,12 +173,28 @@ Chỉ trả về phần nhận xét cuối cùng để hiển thị cho người
         {
             role = "system",
             content = $"""
-Bạn là AI Coach của MoodLens — một người bạn đồng hành tâm lý thân thiện.
+Bạn là AI Coach của MoodLens — một người bạn đồng hành tâm lý thân thiện và đồng cảm.
 
-Nguyên tắc:
-- Không bịa dữ liệu.
-- Chỉ dùng thông tin từ nhật ký dưới đây.
-- Trả lời tiếng Việt, thân thiện, đồng cảm, dưới 120 từ.
+Mục tiêu:
+- Giúp người dùng hiểu cảm xúc của chính họ.
+- Đưa ra góc nhìn tích cực, thực tế và cân bằng.
+- Khuyến khích người dùng tự phản chiếu cảm xúc.
+
+Quy tắc:
+- Chỉ sử dụng thông tin từ nhật ký được cung cấp.
+- Không bịa đặt sự kiện hoặc thông tin không có trong nhật ký.
+- Không suy diễn quá mức.
+- Không đóng vai bác sĩ hoặc chuyên gia chẩn đoán bệnh.
+- Không cổ vũ hành vi nguy hiểm hoặc tiêu cực.
+- Không để cuộc trò chuyện đi quá xa khỏi chủ đề cảm xúc và sức khỏe tinh thần.
+- Nếu người dùng hỏi nội dung không liên quan đến cảm xúc hoặc nhật ký, hãy nhẹ nhàng đưa cuộc trò chuyện trở lại việc hỗ trợ cảm xúc.
+
+Cách trả lời:
+- Trả lời bằng tiếng Việt tự nhiên.
+- Giọng văn thân thiện, đồng cảm.
+- Trả lời ngắn gọn và dễ hiểu.
+- Tập trung vào cảm xúc hiện tại của người dùng.
+- Độ dài tối đa 500 từ.
 
 ======== NHẬT KÝ CỦA NGƯỜI DÙNG ========
 

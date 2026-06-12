@@ -15,7 +15,6 @@ const moodConfig = {
     sad: { emoji: "😢", text: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/25", pie: "#3b82f6", cal: "bg-blue-500" },
     stress: { emoji: "😰", text: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/25", pie: "#eab308", cal: "bg-yellow-500" },
     neutral: { emoji: "😐", text: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/25", pie: "#a855f7", cal: "bg-purple-500" },
-    angry: { emoji: "😠", text: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/25", pie: "#ef4444", cal: "bg-red-500" },
 };
 const getMood = (mood) => moodConfig[(mood || "").toLowerCase()] || moodConfig.neutral;
 
@@ -25,6 +24,7 @@ const streakLabel = (d) => d >= 30 ? "Legend 🏅" : d >= 14 ? "Amazing 🚀" : 
 const Skeleton = ({ className }) => (
     <div className={`animate-pulse bg-slate-800 rounded-xl ${className}`} />
 );
+
 
 // ── Modal đọc nhật kí ─────────────────────────────────────────────────────────
 function JournalModal({ journal, onClose }) {
@@ -117,7 +117,10 @@ export default function Dashboard() {
     const loadDashboard = async () => {
         const res = await api.get("/dashboard");
         setData(res.data);
+
+
     };
+
 
     const refreshWeeklyInsight = async () => {
         try {
@@ -155,6 +158,14 @@ export default function Dashboard() {
             </div>
         </div>
     );
+
+    //Calendar data (7 ngày gần nhất, sẽ được backend cung cấp thực tế)
+    const week = Array(7).fill(null);
+
+    data.calendar?.forEach(item => {
+        const dayIndex = new Date(item.date).getDay();
+        week[dayIndex] = item;
+    });
 
     return (
         <div className="min-h-screen bg-gray-950 text-white p-4 sm:p-8">
@@ -228,12 +239,20 @@ export default function Dashboard() {
                 {/* Trend */}
                 <div className="bg-slate-900 border border-white/8 rounded-2xl p-5">
                     <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
-                        📈 Xu hướng cảm xúc
+                        📈 Xu hướng cảm xúc (trong 20 bài viết gần nhất)
                     </h2>
                     <ResponsiveContainer width="100%" height={240}>
+
                         <LineChart data={data.trend || []}>
                             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                            <XAxis dataKey="date" tick={{ fill: "#6b7280", fontSize: 11 }} />
+                            <XAxis dataKey="date"
+                                tickFormatter={(value) =>
+                                    new Intl.DateTimeFormat("vi-VN", {
+                                        day: "2-digit",
+                                        month: "2-digit"
+                                    }).format(new Date(value))
+                                }
+                                tick={{ fill: "#6b7280", fontSize: 11 }} />
                             <YAxis tick={{ fill: "#6b7280", fontSize: 11 }} domain={[0, 100]} />
                             <Tooltip
                                 contentStyle={{ background: "#1e293b", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12 }}
@@ -334,17 +353,41 @@ export default function Dashboard() {
                         ))}
                     </div>
 
-                    <div className="grid grid-cols-7 gap-1.5">
-                        {data.calendar?.map((day, i) => {
+                    <div className="grid grid-cols-7 gap-2">
+
+                        {week.map((day, i) => {
+
+                            if (!day)
+                                return (
+                                    <div
+                                        key={i}
+                                        className="aspect-square rounded-md bg-white/5"
+                                    />
+                                );
+
                             const m = getMood(day.mood);
+
                             return (
-                                <div key={i}
-                                    title={`${new Date(day.date).toLocaleDateString("vi-VN")}\n${m.emoji} ${day.mood} · ${day.score}đ`}
-                                    className={`aspect-square rounded-lg cursor-default
-                                                 transition hover:scale-110 hover:brightness-125
-                                                 ${m.cal} opacity-80`} />
+                                <div
+                                    key={i}
+                                    title={`
+${new Date(day.date).toLocaleDateString("vi-VN")}
+${m.emoji} ${day.mood}
+${day.score} điểm
+`}
+                                    className={`
+                    aspect-square
+                    rounded-md
+                    cursor-pointer
+                    transition-all
+                    hover:scale-125
+                    hover:z-10
+                    ${m.cal}
+                `}
+                                />
                             );
                         })}
+
                     </div>
 
                     {/* Legend */}

@@ -330,9 +330,9 @@ export default function Journal() {
             {selectedJournal && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50
                                 flex items-center justify-center p-4"
-                     onClick={() => setSelected(null)}>
+                    onClick={() => setSelected(null)}>
                     <div className="w-full max-w-xl"
-                         onClick={e => e.stopPropagation()}>
+                        onClick={e => e.stopPropagation()}>
 
                         {detailLoading ? (
                             <div className="bg-slate-900 rounded-2xl border border-white/10 p-6">
@@ -367,7 +367,7 @@ export default function Journal() {
                                                 </p>
                                             </div>
                                             <button onClick={() => setSelected(null)}
-                                                    className="text-gray-500 hover:text-white transition">
+                                                className="text-gray-500 hover:text-white transition">
                                                 <BsXLg size={14} />
                                             </button>
                                         </div>
@@ -375,12 +375,12 @@ export default function Journal() {
                                         {/* Trang giấy */}
                                         <div className="relative bg-slate-900/60 rounded-xl p-5 mb-4
                                                         border border-white/5 max-h-[200px] overflow-y-auto"
-                                             style={{
-                                                 backgroundImage: "repeating-linear-gradient(transparent,transparent 27px,rgba(255,255,255,0.025) 27px,rgba(255,255,255,0.025) 28px)",
-                                                 backgroundPositionY: "12px"
-                                             }}>
+                                            style={{
+                                                backgroundImage: "repeating-linear-gradient(transparent,transparent 27px,rgba(255,255,255,0.025) 27px,rgba(255,255,255,0.025) 28px)",
+                                                backgroundPositionY: "12px"
+                                            }}>
                                             <p className="text-gray-200 leading-7 whitespace-pre-wrap text-sm"
-                                               style={{ fontFamily: "'Georgia', serif" }}>
+                                                style={{ fontFamily: "'Georgia', serif" }}>
                                                 {selectedJournal.content}
                                             </p>
                                         </div>
@@ -393,7 +393,7 @@ export default function Journal() {
                                             </span>
                                             <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
                                                 <div className={`h-full rounded-full ${m.bar}`}
-                                                     style={{ width: `${selectedJournal.score}%` }} />
+                                                    style={{ width: `${selectedJournal.score}%` }} />
                                             </div>
                                         </div>
 
