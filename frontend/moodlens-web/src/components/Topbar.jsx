@@ -13,7 +13,8 @@ export default function Topbar({ onMenuClick }) {
                     <BsList size={22} />
                 </button>
                 <span className="text-white font-semibold text-sm">
-                    MoodLens 🔍❤️
+                    🧠 MoodLens
+                    Listen To Your Mind
                 </span>
             </div>
         </div>

@@ -207,7 +207,7 @@ public class DashboardController : ControllerBase
         {
             Code = "streak_90",
             Title = "Chuỗi 90 ngày",
-            Icon = "🔥🔥🔥",
+            Icon = "⚡",
             Unlocked = currentStreak >= 90
         });
 

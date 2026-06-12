@@ -147,7 +147,7 @@ export default function AiCoach() {
                     <div className="flex items-center gap-4 px-5 py-4 border-b border-white/8">
                         <AiAvatar isThinking={loading} />
                         <div>
-                            <h2 className="font-bold text-base">Ava AI Coach</h2>
+                            <h2 className="font-bold text-base">MoodLens AI</h2>
                             <p className="text-xs text-gray-500">
                                 {loading ? "Đang suy nghĩ..." : "Sẵn sàng trò chuyện"}
                             </p>
