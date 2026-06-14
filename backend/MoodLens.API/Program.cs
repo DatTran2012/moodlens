@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using MoodLens.Application.Interfaces;
 using MoodLens.Infrastructure.Services;
 using MoodLens.Persistence.Context;
+using System;
 using System.Diagnostics;
 using System.Text;
 
@@ -67,26 +68,14 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowReact", policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173", "http://192.168.1.50:5173")
+            .WithOrigins("http://localhost:3000",
+    "http://localhost:5173")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
     });
 });
 
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowFrontend", policy =>
-//    {
-//        policy
-//            .WithOrigins(
-//                "https://moodlens-mauve.vercel.app/"
-//            )
-//            .AllowAnyHeader()
-//            .AllowAnyMethod()
-//            .AllowCredentials();
-//    });
-//});
 //Authen    
 builder.Services.AddScoped<IAuthService, AuthService>();
 
@@ -122,28 +111,6 @@ builder.Services.AddDbContext<MoodLensDbContext>(options =>
 });
 
 var app = builder.Build();
-//Start Ollama if not running
-//var ollamaProcess = Process.GetProcessesByName("ollama");
-
-//if (!ollamaProcess.Any())
-//{
-//    Console.WriteLine("🚀 Starting Ollama...");
-
-//    Process.Start(new ProcessStartInfo
-//    {
-//        FileName = "ollama",
-//        Arguments = "serve",
-//        UseShellExecute = true,
-//        CreateNoWindow = true
-//    });
-
-//    await Task.Delay(5000);
-//}
-
-// =========================
-// AUTO START OLLAMA
-// =========================
-
 using (var http = new HttpClient())
 {
     try
@@ -181,6 +148,15 @@ Console.ResetColor();
 
 // =========================
 
+using (var scope = app.Services.CreateScope())
+{
+    var db =
+        scope.ServiceProvider
+             .GetRequiredService<MoodLensDbContext>();
+
+    db.Database.Migrate();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -191,7 +167,10 @@ app.UseCors("AllowReact");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.MapControllers();
 
 app.Run();
