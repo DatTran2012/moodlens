@@ -69,7 +69,7 @@ builder.Services.AddCors(options =>
     {
         policy
             .WithOrigins("http://localhost:3000",
-    "http://localhost:5173")
+    "http://localhost:5173", "https://moodlens-umber.vercel.app")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -110,36 +110,36 @@ builder.Services.AddDbContext<MoodLensDbContext>(options =>
             .GetConnectionString("DefaultConnection1"));
 });
 
-var app = builder.Build();
-using (var http = new HttpClient())
-{
-    try
-    {
-        var response = await http.GetAsync(
-            "http://localhost:11434/api/tags");
+//var app = builder.Build();
+//using (var http = new HttpClient())
+//{
+//    try
+//    {
+//        var response = await http.GetAsync(
+//            "http://localhost:11434/api/tags");
 
-        if (!response.IsSuccessStatusCode)
-            throw new Exception();
-    }
-    catch
-    {
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("⚠️ Ollama chưa chạy. Đang khởi động...");
-        Console.ResetColor();
+//        if (!response.IsSuccessStatusCode)
+//            throw new Exception();
+//    }
+//    catch
+//    {
+//        Console.ForegroundColor = ConsoleColor.Yellow;
+//        Console.WriteLine("⚠️ Ollama chưa chạy. Đang khởi động...");
+//        Console.ResetColor();
 
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = "ollama",
-            Arguments = "serve",
-            UseShellExecute = true,
-            CreateNoWindow = true,
-            WindowStyle = ProcessWindowStyle.Hidden
-        });
+//        Process.Start(new ProcessStartInfo
+//        {
+//            FileName = "ollama",
+//            Arguments = "serve",
+//            UseShellExecute = true,
+//            CreateNoWindow = true,
+//            WindowStyle = ProcessWindowStyle.Hidden
+//        });
 
-        // chờ Ollama mở port
-        await Task.Delay(5000);
-    }
-}
+//        // chờ Ollama mở port
+//        await Task.Delay(5000);
+//    }
+//}
 
 Console.ForegroundColor = ConsoleColor.Green;
 Console.WriteLine("✅ Ollama Ready");
