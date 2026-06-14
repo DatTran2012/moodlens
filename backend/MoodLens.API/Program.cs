@@ -110,7 +110,7 @@ builder.Services.AddDbContext<MoodLensDbContext>(options =>
             .GetConnectionString("DefaultConnection1"));
 });
 
-//var app = builder.Build();
+var app = builder.Build();
 //using (var http = new HttpClient())
 //{
 //    try
