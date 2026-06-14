@@ -11,8 +11,8 @@ public class GeminiAiService : IGeminiAiService
 
     // gemini-2.0-flash-lite: nhỏ, nhanh → dùng cho chat và weekly insight
     // gemini-2.5-flash: mạnh hơn → dùng cho phân tích mood (cần JSON chính xác)
-    private const string Model_Chat    = "gemini-2.0-flash-lite";
-    private const string Model_Analyze = "gemini-2.5-flash";
+    private const string Model_Chat    = "gemini-2.5-flash-lite";
+    private const string Model_Analyze = "gemini-2.5-flash-lite";
 
     public GeminiAiService(
         HttpClient http,
