@@ -265,7 +265,7 @@ export default function Dashboard() {
                         <LineChart data={data.trend || []}>
                             <CartesianGrid strokeDasharray="3 3" stroke={P.line} />
                             <XAxis dataKey="date"
-                                tickFormatter={v => new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit" }).format(new Date(v))}
+                                // tickFormatter={v => new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit" }).format(new Date(v))}
                                 tick={{ fill: P.muted, fontSize: 11 }} />
                             <YAxis tick={{ fill: P.muted, fontSize: 11 }} domain={[0, 100]} />
                             <Tooltip {...tooltipStyle} />

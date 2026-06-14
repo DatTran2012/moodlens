@@ -6,7 +6,6 @@ import Journal from "./pages/Journal";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import JournalHistory from "./pages/JournalHistory";
-import Analytics from "./pages/Analytics";
 import GlobalLoading from "./components/GlobalLoading";
 import Journaldetail from "./pages/JournalDetail";
 import { Toaster } from "react-hot-toast";

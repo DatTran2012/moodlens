@@ -30,7 +30,7 @@ public class OllamaAiService : IOllamaAiService
             stream = false,
             num_predict = 512,
             num_ctx = 4096,
-            thinking = true
+            think = false
         };
         Console.WriteLine("Model call:" + Model_Analyic.ToString());
         var response = await _http.PostAsJsonAsync(
@@ -59,7 +59,7 @@ public class OllamaAiService : IOllamaAiService
             stream = false,
             num_predict = 512,
             num_ctx = 4096,
-            thinking = false
+            think = false
         };
         Console.WriteLine("Model call:" + Model_Chat.ToString());
         var response = await _http.PostAsJsonAsync(
@@ -202,8 +202,8 @@ Cách trả lời:
 - Giọng văn thân thiện, đồng cảm.
 - Trả lời ngắn gọn và dễ hiểu.
 - Tập trung vào cảm xúc hiện tại của người dùng.
-- Độ dài tối đa 120 từ.
-- Nếu câu trả lời vượt quá 120 từ, hãy tự tóm tắt ngắn gọn hơn. Không được dừng giữa câu. Luôn kết thúc đầy đủ ý.
+- Độ dài tối đa 200 từ.
+- Nếu câu trả lời vượt quá 200 từ, hãy tự tóm tắt ngắn gọn hơn. Không được dừng giữa câu. Luôn kết thúc đầy đủ ý.
 
 ======== NHẬT KÝ CỦA NGƯỜI DÙNG ========
 
