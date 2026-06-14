@@ -13,6 +13,8 @@ import { Toaster } from "react-hot-toast";
 import Register from "./pages/Register";
 import Welcome from "./pages/Welcome";
 import AiCoach from "./pages/AiCoach";
+import Music from "./pages/Music";
+
 
 function App() {
   return (
@@ -94,6 +96,15 @@ function App() {
               </Layout>
             </ProtectedRoute>
           }
+        />
+
+        <Route path="/music" element={
+          <ProtectedRoute>
+            <Layout>
+              <Music />
+            </Layout>
+          </ProtectedRoute>
+        }
         />
       </Routes>
     </BrowserRouter>

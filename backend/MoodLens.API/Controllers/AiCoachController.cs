@@ -59,7 +59,7 @@ public class AiCoachController : ControllerBase
                     """
                 ));
 
-        // 2. Lấy lịch sử chat của conversation này (tối đa 10 lượt)
+        // 2. Lấy lịch sử chat của conversation này (tối đa 3 lượt)
         var chatHistory = new List<(string Role, string Content)>();
 
         if (request.ConversationId != Guid.Empty)
@@ -68,7 +68,7 @@ public class AiCoachController : ControllerBase
                 await _context.AiCoachMessages
                 .Where(x =>
                     x.ConversationId == request.ConversationId)
-                .OrderByDescending(x => x.CreatedAt).Take(10)  // lấy 10 mới nhất từ DB
+                .OrderByDescending(x => x.CreatedAt).Take(3)  // lấy 3 mới nhất từ DB
                 .OrderBy(x => x.CreatedAt)
                 .ToListAsync();
 

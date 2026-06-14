@@ -2,6 +2,7 @@
 using MoodLens.Domain.Entities;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 public class OllamaAiService : IOllamaAiService
 {
@@ -9,7 +10,7 @@ public class OllamaAiService : IOllamaAiService
     private const string BaseUrl = "http://localhost:11434";
     private const string Model_Chat = "gemma4:e2b";
     private const string Model_Analyic = "gemma4:e4b";
-
+    //private const string Model_Analyic = "gemma4:e4b";
     //private const string Model = "gemma4:31b-cloud";
 
 
@@ -26,7 +27,10 @@ public class OllamaAiService : IOllamaAiService
         {
             model = Model_Analyic,
             prompt = prompt,
-            stream = false
+            stream = false,
+            num_predict = 512,
+            num_ctx = 4096,
+            thinking = true
         };
         Console.WriteLine("Model call:" + Model_Analyic.ToString());
         var response = await _http.PostAsJsonAsync(
@@ -52,7 +56,10 @@ public class OllamaAiService : IOllamaAiService
         {
             model = Model_Chat,
             messages = messages,
-            stream = false
+            stream = false,
+            num_predict = 512,
+            num_ctx = 4096,
+            thinking = false
         };
         Console.WriteLine("Model call:" + Model_Chat.ToString());
         var response = await _http.PostAsJsonAsync(
@@ -143,6 +150,7 @@ Không dùng bullet list.
 
 Chỉ trả về phần nhận xét cuối cùng để hiển thị cho người dùng.
 
+
 Bạn chỉ được phép hỗ trợ:
 
 - cảm xúc
@@ -194,19 +202,20 @@ Cách trả lời:
 - Giọng văn thân thiện, đồng cảm.
 - Trả lời ngắn gọn và dễ hiểu.
 - Tập trung vào cảm xúc hiện tại của người dùng.
-- Độ dài tối đa 500 từ.
+- Độ dài tối đa 120 từ.
+- Nếu câu trả lời vượt quá 120 từ, hãy tự tóm tắt ngắn gọn hơn. Không được dừng giữa câu. Luôn kết thúc đầy đủ ý.
 
 ======== NHẬT KÝ CỦA NGƯỜI DÙNG ========
 
 {contextText}
 
-=========================================
+========================================
 """
         };
 
-        // Ghép lịch sử chat cũ (tối đa 10 lượt gần nhất để tránh vượt context)
+        // Ghép lịch sử chat cũ (tối đa 3 lượt gần nhất để tránh vượt context)
         var historyMessages = (chatHistory ?? new())
-            .TakeLast(10)
+            .TakeLast(3)
             .Select(m => new { role = m.Role, content = m.Content });
 
         // Câu hỏi mới nhất của user

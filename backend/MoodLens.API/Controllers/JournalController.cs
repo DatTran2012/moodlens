@@ -136,12 +136,6 @@ public class JournalController : ControllerBase
         if (!string.IsNullOrEmpty(search))
             query = query.Where(x => x.Content.Contains(search));
 
-        //if (date.HasValue)
-        //{
-
-        //    var d = DateTime.SpecifyKind(date.Value.Date,DateTimeKind.Utc);
-        //    query = query.Where(x => x.CreatedAt.Date == d);
-        //}
         if (date.HasValue)
         {
             var startDate = DateTime.SpecifyKind(

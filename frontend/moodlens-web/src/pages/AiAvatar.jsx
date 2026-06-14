@@ -1,24 +1,30 @@
 import { motion } from "framer-motion";
 
+// Palette nâu ấm
+const spineColor = "#c4a882";
+const accentColor = "#7c5c3a";
+
 export default function AiAvatar({ isThinking = false }) {
     return (
         <div className="relative flex items-center justify-center">
-            {/* Outer pulse ring khi đang thinking */}
+            {/* Pulse ring khi thinking — màu nâu ấm thay vì xanh */}
             {isThinking && (
                 <motion.div
-                    animate={{ scale: [1, 1.4, 1], opacity: [0.4, 0, 0.4] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                    className="absolute w-20 h-20 rounded-full bg-blue-500/30"
+                    animate={{ scale:[1, 1.5, 1], opacity:[0.35, 0, 0.35] }}
+                    transition={{ duration: 1.6, repeat: Infinity }}
+                    className="absolute rounded-full"
+                    style={{ width:52, height:52, background:`${spineColor}40` }}
                 />
             )}
 
             <motion.div
                 animate={{ scale: isThinking ? [1, 1.06, 1] : 1 }}
-                transition={{ duration: 1.2, repeat: isThinking ? Infinity : 0 }}
-                className="w-14 h-14 rounded-full
-                           bg-gradient-to-br from-blue-500 to-purple-600
-                           flex items-center justify-center
-                           shadow-lg shadow-blue-500/30 text-2xl"
+                transition={{ duration: 1.3, repeat: isThinking ? Infinity : 0 }}
+                className="w-10 h-10 rounded-full flex items-center justify-center text-lg"
+                style={{
+                    background: `linear-gradient(135deg, ${spineColor} 0%, ${accentColor} 100%)`,
+                    boxShadow: `0 4px 14px ${spineColor}55`,
+                }}
             >
                 🤖
             </motion.div>
