@@ -12,11 +12,11 @@ using System.Security.Claims;
 public class AiCoachController : ControllerBase
 {
     private readonly MoodLensDbContext _context;
-    private readonly IOllamaAiService _aiService;
+    private readonly IGeminiAiService _aiService;
 
     public AiCoachController(
         MoodLensDbContext context,
-        IOllamaAiService aiService)
+        IGeminiAiService aiService)
     {
         _context = context;
         _aiService = aiService;
