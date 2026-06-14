@@ -11,7 +11,7 @@ public class OllamaAiService : IOllamaAiService
     private const string Model_Chat = "gemma4:e2b";
     private const string Model_Analyic = "gemma4:e4b";
     //private const string Model_Analyic = "gemma4:e4b";
-    //private const string Model = "gemma4:31b-cloud";
+    private const string Model = "gemma4:31b-cloud";
 
 
     public OllamaAiService(HttpClient http)
@@ -25,14 +25,14 @@ public class OllamaAiService : IOllamaAiService
     {
         var request = new
         {
-            model = Model_Analyic,
+            model = Model,
             prompt = prompt,
             stream = false,
             num_predict = 512,
             num_ctx = 4096,
             think = false
         };
-        Console.WriteLine("Model call:" + Model_Analyic.ToString());
+        Console.WriteLine("Model call:" + Model.ToString());
         var response = await _http.PostAsJsonAsync(
             $"{BaseUrl}/api/generate",
             request
@@ -54,14 +54,14 @@ public class OllamaAiService : IOllamaAiService
     {
         var request = new
         {
-            model = Model_Chat,
+            model = Model,
             messages = messages,
             stream = false,
             num_predict = 512,
             num_ctx = 4096,
             think = false
         };
-        Console.WriteLine("Model call:" + Model_Chat.ToString());
+        Console.WriteLine("Model call:" + Model.ToString());
         var response = await _http.PostAsJsonAsync(
             $"{BaseUrl}/api/chat",
             request
