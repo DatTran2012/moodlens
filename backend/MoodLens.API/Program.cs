@@ -89,8 +89,7 @@ builder.Services.AddScoped<IWeeklyInsightService, WeeklyInsightService>();
 //// Ollama AI
 builder.Services.AddHttpClient<IOllamaAiService, OllamaAiService>();
 // Gemini AI
-builder.Services.AddHttpClient();
-builder.Services.AddScoped<IGeminiAiService, GeminiAiService>();
+builder.Services.AddHttpClient<IGeminiAiService, GeminiAiService>();
 // Groq AI
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<GroqAiService>();
