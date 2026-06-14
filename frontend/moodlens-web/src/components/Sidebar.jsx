@@ -17,7 +17,7 @@ const menu = [
     { name: "Nhật kí", path: "/journal", icon: <BsJournalText size={17} /> },
     { name: "Lịch sử", path: "/history", icon: <BsClockHistory size={17} /> },
     { name: "AI Coach", path: "/coach", icon: <BsRobot size={17} /> },
-    { name: "Âm nhạc", path: "/music", icon: <BsMusicNoteBeamed size={17} /> },
+    // { name: "Âm nhạc", path: "/music", icon: <BsMusicNoteBeamed size={17} /> },
 ];
 
 export default function Sidebar({ onClose }) {
