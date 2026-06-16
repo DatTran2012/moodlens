@@ -8,6 +8,9 @@ import {
     XAxis, YAxis, Tooltip, CartesianGrid,
     PieChart, Pie, Cell, Legend
 } from "recharts";
+import TodaySnapshotWidget
+    from "../components/TodaySnapshotWidget";
+import useSnapshotStore from "../store/useSnapshotStore";
 
 // ── Palette nâu ấm ────────────────────────────────────────────────────────────
 const P = {
@@ -45,9 +48,26 @@ const SectionTitle = ({ children }) => (
 );
 
 // ── Card wrapper ──────────────────────────────────────────────────────────────
-const Card = ({ children, className = "", style = {} }) => (
-    <div className={`rounded-2xl p-5 ${className}`}
-        style={{ background: P.surface, border: `1px solid ${P.border}`, boxShadow: "0 2px 12px rgba(139,110,80,0.08)", ...style }}>
+const Card = ({
+    children,
+    className = "",
+    style = {}
+}) => (
+    <div
+        className={`
+            rounded-2xl
+            p-4
+            min-h-[120px]
+            ${className}
+        `}
+        style={{
+            background: P.surface,
+            border: `1px solid ${P.border}`,
+            boxShadow:
+                "0 2px 12px rgba(139,110,80,0.08)",
+            ...style
+        }}
+    >
         {children}
     </div>
 );
@@ -134,7 +154,13 @@ export default function Dashboard() {
     const [refreshing, setRefreshing] = useState(false);
     const [modalJournal, setModal] = useState(null);
     const navigate = useNavigate();
+    const {
+        loadSnapshots
+    } = useSnapshotStore();
 
+    useEffect(() => {
+        loadSnapshots();
+    }, []);
     useEffect(() => {
         loadDashboard();
         const t = setInterval(() => setClock(new Date()), 1000);
@@ -166,9 +192,14 @@ export default function Dashboard() {
 
     // Loading
     if (!data) return (
-        <div className="min-h-screen p-4 sm:p-8" style={{ background: P.bg }}>
+        <div className="
+ min-h-screen
+ p-3
+ sm:p-5
+ lg:p-8
+ " style={{ background: P.bg }}>
             <Skeleton className="h-32 mb-6" />
-            <div className="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
                 {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-28" />)}
             </div>
             <Skeleton className="h-48 mb-6" />
@@ -187,7 +218,12 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="min-h-screen p-4 sm:p-8" style={{ background: P.bg, color: P.text }}>
+        <div className="
+ min-h-screen
+ p-3
+ sm:p-5
+ lg:p-8
+ " style={{ background: P.bg, color: P.text }}>
 
             {/* ── HEADER — bìa nhật kí ── */}
             <div className="relative rounded-2xl p-6 mb-6 overflow-hidden"
@@ -216,7 +252,7 @@ export default function Dashboard() {
             </div>
 
             {/* ── KPI CARDS ── */}
-            <div className="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
                 {[
                     { label: "Tổng nhật kí", value: data.totalJournals, icon: <BsJournalText size={18} style={{ color: P.accent }} />, vColor: P.text },
                     { label: "Điểm TB", value: data.averageScore, icon: <span className="text-lg">⭐</span>, vColor: "#92701a" },
@@ -227,7 +263,7 @@ export default function Dashboard() {
                             {c.icon}
                             <span className="text-xs" style={{ color: P.muted }}>{c.label}</span>
                         </div>
-                        <p className="text-3xl font-bold" style={{ color: c.vColor }}>{c.value}</p>
+                        <p className="text-2xl md:text-3xl font-bold" style={{ color: c.vColor }}>{c.value}</p>
                     </Card>
                 ))}
 
@@ -255,13 +291,18 @@ export default function Dashboard() {
                     <p className="text-3xl font-bold text-orange-700">{data.currentStreak}</p>
                     <p className="text-xs text-orange-600/80 mt-1">{streakLabel(data.currentStreak)}</p>
                 </div>
+
+                {/* ── TODAY SNAPSHOT HERO ── */}
+                <div className="mb-6 w-full">
+                    <TodaySnapshotWidget />
+                </div>
             </div>
 
             {/* ── CHARTS ── */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
                 <Card>
                     <SectionTitle>📈 Xu hướng cảm xúc</SectionTitle>
-                    <ResponsiveContainer width="100%" height={240}>
+                    <ResponsiveContainer width="100%" height={220}>
                         <LineChart data={data.trend || []}>
                             <CartesianGrid strokeDasharray="3 3" stroke={P.line} />
                             <XAxis dataKey="date"
@@ -367,7 +408,14 @@ export default function Dashboard() {
 
                 <Card>
                     <SectionTitle>🏆 Thành tựu</SectionTitle>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div
+                        className="
+ grid
+ grid-cols-1
+ sm:grid-cols-2
+ gap-3
+ "
+                    >
                         {data.achievements?.map(a => (
                             <div key={a.code}
                                 className={`rounded-xl p-3 border transition ${a.unlocked ? "opacity-100" : "opacity-35"}`}

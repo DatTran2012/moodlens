@@ -14,13 +14,13 @@ namespace MoodLens.API.Controllers;
 public class JournalController : ControllerBase
 {
     private readonly MoodLensDbContext _context;
-    private readonly IGeminiAiService _ai;
+    private readonly IOllamaAiService _ai;
     private readonly IWeeklyInsightService _weeklyInsightService;
 
 
     public JournalController(
         MoodLensDbContext context,
-        IGeminiAiService ai,
+        IOllamaAiService ai,
         IWeeklyInsightService weeklyInsightService)
     {
         _context = context;

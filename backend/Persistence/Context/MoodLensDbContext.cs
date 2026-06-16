@@ -30,6 +30,7 @@ public class MoodLensDbContext : DbContext
         get;
         set;
     }
+    public DbSet<MoodSnapshot> MoodSnapshots { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

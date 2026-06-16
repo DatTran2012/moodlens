@@ -79,7 +79,6 @@ builder.Services.AddCors(options =>
 
 //Authen    
 builder.Services.AddScoped<IAuthService, AuthService>();
-
 //Service Mood
 builder.Services.AddScoped<AiMoodService>();
 //Service Dashboard
@@ -95,13 +94,6 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<GroqAiService>();
 // WeeklyInsightWorker
 builder.Services.AddHostedService<WeeklyInsightWorker>();
-////Database configuration sql server
-//builder.Services.AddDbContext<MoodLensDbContext>(options =>
-//{
-//    options.UseSqlServer(
-//        builder.Configuration.GetConnectionString("DefaultConnection"));
-//});
-
 ////Database configuration postgresql
 builder.Services.AddDbContext<MoodLensDbContext>(options =>
 {
@@ -109,43 +101,52 @@ builder.Services.AddDbContext<MoodLensDbContext>(options =>
         builder.Configuration
             .GetConnectionString("DefaultConnection1"));
 });
+// MoodSnapshot service
+builder.Services.AddScoped<
+    IMoodSnapshotService,
+    MoodSnapshotService>();
+builder.Services.AddScoped<
+    IFileStorageService,
+    CloudinaryFileStorageService>();
+// Cloudinary
+builder.Services.Configure<CloudinarySettings>(
+    builder.Configuration.GetSection("Cloudinary"));
 
+//AppSettings
 var app = builder.Build();
-//using (var http = new HttpClient())
-//{
-//    try
-//    {
-//        var response = await http.GetAsync(
-//            "http://localhost:11434/api/tags");
+using (var http = new HttpClient())
+{
+    try
+    {
+        var response = await http.GetAsync(
+            "http://localhost:11434/api/tags");
 
-//        if (!response.IsSuccessStatusCode)
-//            throw new Exception();
-//    }
-//    catch
-//    {
-//        Console.ForegroundColor = ConsoleColor.Yellow;
-//        Console.WriteLine("⚠️ Ollama chưa chạy. Đang khởi động...");
-//        Console.ResetColor();
+        if (!response.IsSuccessStatusCode)
+            throw new Exception();
+    }
+    catch
+    {
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("⚠️ Ollama chưa chạy. Đang khởi động...");
+        Console.ResetColor();
 
-//        Process.Start(new ProcessStartInfo
-//        {
-//            FileName = "ollama",
-//            Arguments = "serve",
-//            UseShellExecute = true,
-//            CreateNoWindow = true,
-//            WindowStyle = ProcessWindowStyle.Hidden
-//        });
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = "ollama",
+            Arguments = "serve",
+            UseShellExecute = true,
+            CreateNoWindow = true,
+            WindowStyle = ProcessWindowStyle.Hidden
+        });
 
-//        // chờ Ollama mở port
-//        await Task.Delay(5000);
-//    }
-//}
+        // chờ Ollama mở port
+        await Task.Delay(5000);
+    }
+}
 
 Console.ForegroundColor = ConsoleColor.Green;
 Console.WriteLine("✅ Ollama Ready");
 Console.ResetColor();
-
-
 // =========================
 
 using (var scope = app.Services.CreateScope())
@@ -166,7 +167,7 @@ app.UseCors("AllowReact");
 //JWT
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseStaticFiles();
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();

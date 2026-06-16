@@ -14,6 +14,7 @@ import Welcome from "./pages/Welcome";
 import AiCoach from "./pages/AiCoach";
 import Music from "./pages/music";
 import { MusicProvider } from "./pages/MusicContext";
+import MoodSnapshots from "./pages/MoodSnapshots";
 
 
 function App() {
@@ -102,6 +103,17 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Music />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/snapshots"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <MoodSnapshots />
                 </Layout>
               </ProtectedRoute>
             }
