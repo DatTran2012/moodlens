@@ -13,6 +13,7 @@ import Register from "./pages/Register";
 import Welcome from "./pages/Welcome";
 import AiCoach from "./pages/AiCoach";
 import Music from "./pages/music";
+import { MusicProvider } from "./pages/MusicContext";
 
 
 function App() {
@@ -27,85 +28,86 @@ function App() {
         }}
       />
 
-      {/* routes */}
+      {/* BỌC MusicProvider tại đây: Toàn bộ ứng dụng sẽ sử dụng chung hệ thống nhạc ngầm */}
+      <MusicProvider>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+          <Route path="/" element={<Login />} />
+          <Route path="/welcome" element={<Welcome />} />
 
-      <Routes>
-        <Route
-          path="/register"
-          element={<Register />}
-        />
-        {/* LOGIN KHÔNG SIDEBAR */}
-        {/* <Route path="/" element={<Login />} /> */}
-        <Route
-          path="/"
-          element={<Login />}
-        />
+          {/* DASHBOARD */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Dashboard />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
 
-        {/* SAU LOGIN → CÓ SIDEBAR */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Dashboard />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+          {/* NHẬT KÝ */}
+          <Route
+            path="/journal"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Journal />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/journal"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <Journal />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+          {/* LỊCH SỬ NHẬT KÝ */}
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <JournalHistory />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/history"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <JournalHistory />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/journal/:id" element={
-          <ProtectedRoute>
-            <Layout>
-              <Journaldetail />
-            </Layout>
-          </ProtectedRoute>
-        }
-        />
-        <Route
-          path="/welcome"
-          element={<Welcome />}
-        />
-        <Route
-          path="/coach"
-          element={
-            <ProtectedRoute>
-              <Layout>
-                <AiCoach />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+          {/* CHI TIẾT NHẬT KÝ */}
+          <Route
+            path="/journal/:id"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Journaldetail />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="/music" element={
-          <ProtectedRoute>
-            <Layout>
-              <Music />
-            </Layout>
-          </ProtectedRoute>
-        }
-        />
-      </Routes>
+          {/* AI COACH */}
+          <Route
+            path="/coach"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <AiCoach />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* TRANG ÂM NHẠC CHUẨN: Bây giờ đã là một Route độc lập, không còn bị dính lẹo khi cuộn trang khác nữa */}
+          <Route
+            path="/music"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Music />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </MusicProvider>
     </BrowserRouter>
   );
 }
