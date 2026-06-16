@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 import api from "../api/axios";
 import toast from "react-hot-toast";
-import { BsPencilFill, BsStars, BsJournalPlus, BsXLg, BsClockHistory } from "react-icons/bs";
+import { BsPencilFill, BsStars, BsJournalPlus, BsXLg } from "react-icons/bs";
 
 const DRAFT_KEY = "moodlens_journal_draft";
 
@@ -34,7 +34,7 @@ const moodRanges = [
     { min: 80, max: 100, label: "Vui", color: "bg-emerald-500", emoji: "😊" },
 ];
 
-const today = () => new Date().toLocaleDateString("vi-VN", {
+const todayStr = () => new Date().toLocaleDateString("vi-VN", {
     weekday: "long", year: "numeric", month: "long", day: "numeric"
 });
 
@@ -46,164 +46,92 @@ const SkeletonCard = () => (
     </div>
 );
 
-export default function Journal() {
-    const [content, setContent] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState(null);
-    const [displaySummary, setDisplay] = useState("");
-    const [recentJournals, setRecent] = useState([]);
-    const [selectedJournal, setSelected] = useState(null);
-    const [detailLoading, setDetailLoad] = useState(false);
-    const [wordCount, setWordCount] = useState(0);
-    const [mobileTab, setMobileTab] = useState("write"); // "write" | "result"
-
-    useEffect(() => {
-        const draft = localStorage.getItem(DRAFT_KEY);
-        if (draft) setContent(draft);
-        loadRecent();
-    }, []);
-
-    useEffect(() => {
-        localStorage.setItem(DRAFT_KEY, content);
-        setWordCount(content.trim() ? content.trim().split(/\s+/).length : 0);
-    }, [content]);
-
-    useEffect(() => {
-        if (!result?.summary) return;
-        let i = 0; setDisplay("");
-        const iv = setInterval(() => {
-            i++;
-            setDisplay(result.summary.slice(0, i));
-            if (i >= result.summary.length) clearInterval(iv);
-        }, 18);
-        return () => clearInterval(iv);
-    }, [result?.summary]);
-
-    const loadRecent = async () => {
-        try {
-            const res = await api.get("/journal/history?page=1&pageSize=3");
-            setRecent(res.data.data || []);
-        } catch (e) { console.error(e); }
-    };
-
-    const openDetail = async (id) => {
-        setSelected({ _loading: true }); setDetailLoad(true);
-        try { const res = await api.get(`/journal/${id}`); setSelected(res.data); }
-        catch (e) { console.error(e); setSelected(null); }
-        finally { setDetailLoad(false); }
-    };
-
-    const handleAnalyze = async () => {
-        if (!content.trim() || loading) return;
-        try {
-            setLoading(true); setResult(null);
-            const res = await api.post("/journal", { content });
-            setResult({ mood: res.data.mood, score: res.data.score, summary: res.data.summary });
-            localStorage.removeItem(DRAFT_KEY);
-            await loadRecent();
-            toast.success("Đã lưu & phân tích cảm xúc 🎉");
-            setMobileTab("result"); // tự chuyển sang tab kết quả trên mobile
-        } catch { toast.error("Không thể phân tích cảm xúc"); }
-        finally { setLoading(false); }
-    };
-
-    const handleNewPage = () => {
-        if (content.trim() && !window.confirm("Bắt đầu trang mới? Nội dung hiện tại sẽ bị xoá.")) return;
-        setContent(""); setResult(null); setDisplay("");
-        localStorage.removeItem(DRAFT_KEY);
-        setMobileTab("write");
-    };
-
-    const handleKeyDown = (e) => {
-        if (window.innerWidth < 768) return;
-        if (e.shiftKey && e.key === "Enter") return;
-        if (e.key === "Enter") { e.preventDefault(); handleAnalyze(); }
-    };
-
-    const mood = result ? getMood(result.mood) : null;
-
-    // ── Panel viết ────────────────────────────────────────────────────────────
-    const WritePanel = () => (
-        <div>
-            {/* Tờ nhật kí */}
-            <div className="relative rounded-2xl overflow-hidden"
+// ── WritePanel — NGOÀI component ─────────────────────────────────────────────
+const WritePanel = memo(({
+    content, setContent, loading, wordCount,
+    handleAnalyze, handleKeyDown,
+    recentJournals, openDetail,
+}) => (
+    <div>
+        {/* Tờ nhật kí */}
+        <div className="relative rounded-2xl overflow-hidden"
+            style={{
+                background: P.surface,
+                border: `1px solid ${P.border}`,
+                boxShadow: "0 4px 20px rgba(139,110,80,0.10), inset 0 0 0 1px rgba(255,255,255,0.6)"
+            }}>
+            <div className="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-2xl"
+                style={{ background: `linear-gradient(to bottom, ${P.spine}, #a8896a, ${P.spine})` }} />
+            <div className="absolute inset-0 pointer-events-none"
                 style={{
-                    background: P.surface,
-                    border: `1px solid ${P.border}`,
-                    boxShadow: "0 4px 20px rgba(139,110,80,0.10), inset 0 0 0 1px rgba(255,255,255,0.6)"
-                }}>
-                <div className="absolute left-0 top-0 bottom-0 w-1.5 rounded-l-2xl"
-                    style={{ background: `linear-gradient(to bottom, ${P.spine}, #a8896a, ${P.spine})` }} />
-                <div className="absolute inset-0 pointer-events-none"
-                    style={{
-                        backgroundImage: `repeating-linear-gradient(transparent,transparent 31px,${P.line} 31px,${P.line} 32px)`,
-                        backgroundPositionY: "56px"
-                    }} />
-                <div className="relative p-6 pl-9">
-                    <div className="text-xs font-medium mb-4 tracking-wide pb-3"
-                        style={{ color: P.muted, borderBottom: `1px solid ${P.border}`, fontFamily: "'Georgia', serif" }}>
-                        📅 {today()}
-                    </div>
-                    <textarea
-                        value={content}
-                        disabled={loading}
-                        onChange={e => setContent(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder={"Hôm nay bạn cảm thấy thế nào?\n\nHãy viết tự do — không có gì là đúng hay sai..."}
-                        className="w-full h-[280px] md:h-[360px] resize-none bg-transparent outline-none leading-8 text-[15px]"
-                        style={{ color: P.text, fontFamily: "'Georgia', serif", caretColor: P.accent }}
-                    />
-                    <div className="flex items-center justify-between mt-2 text-xs" style={{ color: P.muted }}>
-                        <span>{wordCount} từ</span>
-                        <span className="hidden sm:inline">Enter để phân tích · Shift+Enter xuống dòng</span>
-                    </div>
+                    backgroundImage: `repeating-linear-gradient(transparent,transparent 31px,${P.line} 31px,${P.line} 32px)`,
+                    backgroundPositionY: "56px"
+                }} />
+            <div className="relative p-4 sm:p-6 pl-7 sm:pl-9">
+                <div className="text-xs font-medium mb-4 tracking-wide pb-3"
+                    style={{ color: P.muted, borderBottom: `1px solid ${P.border}`, fontFamily: "'Georgia', serif" }}>
+                    📅 {todayStr()}
+                </div>
+                <textarea
+                    value={content}
+                    disabled={loading}
+                    onChange={e => setContent(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={"Hôm nay bạn cảm thấy thế nào?\n\nHãy viết tự do — không có gì là đúng hay sai..."}
+                    className="w-full h-[260px] sm:h-[360px] resize-none bg-transparent outline-none leading-8 text-[15px]"
+                    style={{ color: P.text, fontFamily: "'Georgia', serif", caretColor: P.accent }}
+                />
+                <div className="flex items-center justify-between mt-2 text-xs" style={{ color: P.muted }}>
+                    <span>{wordCount} từ</span>
+                    <span className="hidden sm:inline">Enter để phân tích · Shift+Enter xuống dòng</span>
                 </div>
             </div>
-
-            {/* Nút phân tích */}
-            <button onClick={handleAnalyze} disabled={loading || !content.trim()}
-                className="mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold transition text-sm text-white hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ background: `linear-gradient(135deg, #7c5c3a, #5c3d20)`, boxShadow: "0 4px 16px rgba(124,92,58,0.3)" }}>
-                <BsStars size={16} />
-                {loading ? "Đang phân tích..." : "Phân tích cảm xúc"}
-            </button>
-
-            {/* Nhật kí gần đây */}
-            <div className="mt-6">
-                <h3 className="text-xs font-bold uppercase tracking-widest mb-3"
-                    style={{ color: P.muted, fontFamily: "'Georgia', serif" }}>
-                    Gần đây
-                </h3>
-                {recentJournals.length === 0
-                    ? <p className="text-sm text-center py-6" style={{ color: P.muted }}>Chưa có nhật kí nào</p>
-                    : (
-                        <div className="space-y-2">
-                            {recentJournals.map(j => {
-                                const m = getMood(j.mood);
-                                return (
-                                    <div key={j.id} onClick={() => openDetail(j.id)}
-                                        className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition hover:brightness-95 ${m.bg} ${m.border}`}>
-                                        <span className="text-lg mt-0.5">{m.emoji}</span>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm truncate" style={{ color: P.text, fontFamily: "'Georgia', serif" }}>
-                                                {j.content.length > 70 ? j.content.slice(0, 70) + "..." : j.content}
-                                            </p>
-                                            <p className="text-xs mt-1" style={{ color: P.muted }}>
-                                                {new Date(j.createdAt).toLocaleDateString("vi-VN")}
-                                            </p>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )
-                }
-            </div>
         </div>
-    );
 
-    // ── Panel kết quả AI ──────────────────────────────────────────────────────
-    const ResultPanel = () => (
+        {/* Nút phân tích */}
+        <button onClick={handleAnalyze} disabled={loading || !content.trim()}
+            className="mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm text-white transition hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: `linear-gradient(135deg, #7c5c3a, #5c3d20)`, boxShadow: "0 4px 16px rgba(124,92,58,0.3)" }}>
+            <BsStars size={16} />
+            {loading ? "Đang phân tích..." : "Phân tích cảm xúc"}
+        </button>
+
+        {/* Nhật kí gần đây */}
+        <div className="mt-6">
+            <h3 className="text-xs font-bold uppercase tracking-widest mb-3"
+                style={{ color: P.muted, fontFamily: "'Georgia', serif" }}>Gần đây</h3>
+            {recentJournals.length === 0
+                ? <p className="text-sm text-center py-6" style={{ color: P.muted }}>Chưa có nhật kí nào</p>
+                : (
+                    <div className="space-y-2">
+                        {recentJournals.map(j => {
+                            const m = getMood(j.mood);
+                            return (
+                                <div key={j.id} onClick={() => openDetail(j.id)}
+                                    className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition hover:brightness-95 ${m.bg} ${m.border}`}>
+                                    <span className="text-lg mt-0.5">{m.emoji}</span>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm truncate" style={{ color: P.text, fontFamily: "'Georgia', serif" }}>
+                                            {j.content.length > 70 ? j.content.slice(0, 70) + "..." : j.content}
+                                        </p>
+                                        <p className="text-xs mt-1" style={{ color: P.muted }}>
+                                            {new Date(j.createdAt).toLocaleDateString("vi-VN")}
+                                        </p>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )
+            }
+        </div>
+    </div>
+));
+
+// ── ResultPanel — NGOÀI component ────────────────────────────────────────────
+const ResultPanel = memo(({ result, loading, displaySummary }) => {
+    const mood = result ? getMood(result.mood) : null;
+    return (
         <div className="space-y-4">
             {/* Cảm xúc */}
             <div className={`rounded-2xl p-5 border transition-all duration-500 ${mood ? `${mood.bg} ${mood.border}` : ""}`}
@@ -265,23 +193,168 @@ export default function Journal() {
             </div>
         </div>
     );
+});
+
+// ── ModalDetail — NGOÀI component ────────────────────────────────────────────
+const ModalDetail = memo(({ selectedJournal, detailLoading, onClose }) => {
+    if (!selectedJournal) return null;
+    const m = getMood(selectedJournal?.mood);
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: "rgba(59,47,30,0.55)", backdropFilter: "blur(4px)" }}
+            onClick={onClose}>
+            <div className="w-full max-w-xl" onClick={e => e.stopPropagation()}>
+                {detailLoading ? (
+                    <div className="rounded-2xl p-6" style={{ background: P.bg, border: `1px solid ${P.border}` }}>
+                        <SkeletonCard />
+                    </div>
+                ) : !selectedJournal._loading && (
+                    <div className="rounded-2xl overflow-hidden shadow-2xl"
+                        style={{ background: P.bg, border: `1px solid ${P.border}` }}>
+                        <div className="h-1.5 w-full" style={{ background: P.spine, opacity: 0.8 }} />
+                        <div className="p-6">
+                            <div className="flex items-start justify-between mb-5">
+                                <div>
+                                    <div className={`flex items-center gap-2 text-sm font-semibold ${m.text}`}>
+                                        <span>{m.emoji}</span>
+                                        <span className="capitalize">{selectedJournal.mood}</span>
+                                        <span style={{ color: P.border }}>·</span>
+                                        <span className="font-normal" style={{ color: P.muted }}>
+                                            {new Date(selectedJournal.createdAt).toLocaleDateString("vi-VN", { weekday: "short", day: "numeric", month: "short" })}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs mt-1" style={{ color: P.muted }}>
+                                        🕒 {new Date(selectedJournal.createdAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
+                                    </p>
+                                </div>
+                                <button onClick={onClose} style={{ color: P.muted }} className="hover:opacity-70 transition">
+                                    <BsXLg size={14} />
+                                </button>
+                            </div>
+                            <div className="rounded-xl p-5 mb-4 max-h-[200px] overflow-y-auto"
+                                style={{ background: P.card, border: `1px solid ${P.border}`, backgroundImage: `repeating-linear-gradient(transparent,transparent 27px,${P.line} 27px,${P.line} 28px)`, backgroundPositionY: "12px" }}>
+                                <p className="leading-7 whitespace-pre-wrap text-sm" style={{ color: P.text, fontFamily: "'Georgia', serif" }}>
+                                    {selectedJournal.content}
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className="text-xs shrink-0" style={{ color: P.muted }}>Điểm</span>
+                                <span className={`text-base font-bold shrink-0 ${m.text}`}>{selectedJournal.score}</span>
+                                <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: P.card }}>
+                                    <div className={`h-full rounded-full ${m.bar}`} style={{ width: `${selectedJournal.score}%` }} />
+                                </div>
+                            </div>
+                            {selectedJournal.summary && (
+                                <div className="rounded-xl p-4" style={{ background: "#fef9ec", border: "1px solid #e8d5a0" }}>
+                                    <p className="text-xs font-semibold mb-2 flex items-center gap-1.5" style={{ color: "#92701a" }}>
+                                        <BsStars size={11} /> AI phân tích
+                                    </p>
+                                    <p className="text-sm leading-6" style={{ color: "#6b5320", fontFamily: "'Georgia', serif" }}>
+                                        {selectedJournal.summary}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+});
+
+// ── Main component ────────────────────────────────────────────────────────────
+export default function Journal() {
+    const [content, setContent] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [result, setResult] = useState(null);
+    const [displaySummary, setDisplay] = useState("");
+    const [recentJournals, setRecent] = useState([]);
+    const [selectedJournal, setSelected] = useState(null);
+    const [detailLoading, setDetailLoad] = useState(false);
+    const [wordCount, setWordCount] = useState(0);
+    const [mobileTab, setMobileTab] = useState("write");
+
+    useEffect(() => {
+        const draft = localStorage.getItem(DRAFT_KEY);
+        if (draft) setContent(draft);
+        loadRecent();
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem(DRAFT_KEY, content);
+        setWordCount(content.trim() ? content.trim().split(/\s+/).length : 0);
+    }, [content]);
+
+    useEffect(() => {
+        if (!result?.summary) return;
+        let i = 0; setDisplay("");
+        const iv = setInterval(() => {
+            i++; setDisplay(result.summary.slice(0, i));
+            if (i >= result.summary.length) clearInterval(iv);
+        }, 18);
+        return () => clearInterval(iv);
+    }, [result?.summary]);
+
+    const loadRecent = async () => {
+        try {
+            const res = await api.get("/journal/history?page=1&pageSize=3");
+            setRecent(res.data.data || []);
+        } catch (e) { console.error(e); }
+    };
+
+    const openDetail = async (id) => {
+        setSelected({ _loading: true }); setDetailLoad(true);
+        try { const res = await api.get(`/journal/${id}`); setSelected(res.data); }
+        catch (e) { console.error(e); setSelected(null); }
+        finally { setDetailLoad(false); }
+    };
+
+    const handleAnalyze = async () => {
+        if (!content.trim() || loading) return;
+        try {
+            setLoading(true); setResult(null);
+            const res = await api.post("/journal", { content });
+            setResult({ mood: res.data.mood, score: res.data.score, summary: res.data.summary });
+            localStorage.removeItem(DRAFT_KEY);
+            await loadRecent();
+            toast.success("Đã lưu & phân tích cảm xúc 🎉");
+            setMobileTab("result");
+        } catch { toast.error("Không thể phân tích cảm xúc"); }
+        finally { setLoading(false); }
+    };
+
+    const handleNewPage = () => {
+        if (content.trim() && !window.confirm("Bắt đầu trang mới? Nội dung hiện tại sẽ bị xoá.")) return;
+        setContent(""); setResult(null); setDisplay("");
+        localStorage.removeItem(DRAFT_KEY);
+        setMobileTab("write");
+    };
+
+    const handleKeyDown = (e) => {
+        if (window.innerWidth < 768) return;
+        if (e.shiftKey && e.key === "Enter") return;
+        if (e.key === "Enter") { e.preventDefault(); handleAnalyze(); }
+    };
+
+    const writePanelProps = { content, setContent, loading, wordCount, handleAnalyze, handleKeyDown, recentJournals, openDetail };
+    const resultPanelProps = { result, loading, displaySummary };
 
     return (
         <div style={{ background: P.bg, color: P.text, minHeight: "100dvh" }}>
 
-            {/* ── HEADER ── */}
-            <div className="flex items-start justify-between p-4 md:px-8 md:pt-8 pb-4">
+            {/* HEADER */}
+            <div className="flex items-start justify-between p-4 sm:px-8 sm:pt-8 pb-4">
                 <div>
                     <div className="flex items-center gap-3 mb-1">
                         <BsPencilFill size={20} style={{ color: P.accent }} />
-                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight"
+                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight"
                             style={{ fontFamily: "'Georgia', serif", color: P.text }}>
                             Nhật kí của tôi
                         </h1>
                     </div>
-                    <p className="text-sm ml-9 capitalize" style={{ color: P.muted }}>{today()}</p>
+                    <p className="text-sm ml-9 capitalize" style={{ color: P.muted }}>{todayStr()}</p>
                 </div>
-                <button onClick={handleNewPage} title="Trang mới"
+                <button onClick={handleNewPage}
                     className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition hover:opacity-80"
                     style={{ background: P.surface, border: `1px solid ${P.border}`, color: P.accent }}>
                     <BsJournalPlus size={17} />
@@ -289,110 +362,40 @@ export default function Journal() {
                 </button>
             </div>
 
-            {/* ── MOBILE: tab switcher ── */}
+            {/* MOBILE tab switcher */}
             <div className="lg:hidden flex gap-2 px-4 pb-4">
                 <button onClick={() => setMobileTab("write")}
                     className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition"
-                    style={{
-                        background: mobileTab === "write" ? P.accent : P.card,
-                        color: mobileTab === "write" ? "white" : P.muted,
-                        border: `1px solid ${P.border}`,
-                    }}>
+                    style={{ background: mobileTab === "write" ? P.accent : P.card, color: mobileTab === "write" ? "white" : P.muted, border: `1px solid ${P.border}` }}>
                     <BsPencilFill size={13} /> Viết nhật kí
                 </button>
                 <button onClick={() => setMobileTab("result")}
                     className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition"
-                    style={{
-                        background: mobileTab === "result" ? P.accent : P.card,
-                        color: mobileTab === "result" ? "white" : P.muted,
-                        border: `1px solid ${P.border}`,
-                    }}>
-                    <BsStars size={13} />
-                    AI phân tích
-                    {result && (
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                    )}
+                    style={{ background: mobileTab === "result" ? P.accent : P.card, color: mobileTab === "result" ? "white" : P.muted, border: `1px solid ${P.border}` }}>
+                    <BsStars size={13} /> AI phân tích
+                    {result && <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />}
                 </button>
             </div>
 
-            {/* ── MOBILE: nội dung tab ── */}
+            {/* MOBILE nội dung */}
             <div className="lg:hidden px-4 pb-8">
-                {mobileTab === "write" ? <WritePanel /> : <ResultPanel />}
+                {mobileTab === "write"
+                    ? <WritePanel {...writePanelProps} />
+                    : <ResultPanel {...resultPanelProps} />
+                }
             </div>
 
-            {/* ── DESKTOP: 2 cột ── */}
+            {/* DESKTOP 2 cột */}
             <div className="hidden lg:grid lg:grid-cols-2 gap-6 px-8 pb-8">
-                <WritePanel />
-                <ResultPanel />
+                <WritePanel {...writePanelProps} />
+                <ResultPanel {...resultPanelProps} />
             </div>
 
-            {/* ── MODAL CHI TIẾT ── */}
-            {selectedJournal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                    style={{ background: "rgba(59,47,30,0.55)", backdropFilter: "blur(4px)" }}
-                    onClick={() => setSelected(null)}>
-                    <div className="w-full max-w-xl" onClick={e => e.stopPropagation()}>
-                        {detailLoading ? (
-                            <div className="rounded-2xl p-6" style={{ background: P.bg, border: `1px solid ${P.border}` }}>
-                                <SkeletonCard />
-                            </div>
-                        ) : selectedJournal && !selectedJournal._loading && (() => {
-                            const m = getMood(selectedJournal.mood);
-                            return (
-                                <div className="rounded-2xl overflow-hidden shadow-2xl"
-                                    style={{ background: P.bg, border: `1px solid ${P.border}` }}>
-                                    <div className="h-1.5 w-full" style={{ background: P.spine, opacity: 0.8 }} />
-                                    <div className="p-6">
-                                        <div className="flex items-start justify-between mb-5">
-                                            <div>
-                                                <div className={`flex items-center gap-2 text-sm font-semibold ${m.text}`}>
-                                                    <span>{m.emoji}</span>
-                                                    <span className="capitalize">{selectedJournal.mood}</span>
-                                                    <span style={{ color: P.border }}>·</span>
-                                                    <span className="font-normal" style={{ color: P.muted }}>
-                                                        {new Date(selectedJournal.createdAt).toLocaleDateString("vi-VN", { weekday: "short", day: "numeric", month: "short" })}
-                                                    </span>
-                                                </div>
-                                                <p className="text-xs mt-1" style={{ color: P.muted }}>
-                                                    🕒 {new Date(selectedJournal.createdAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
-                                                </p>
-                                            </div>
-                                            <button onClick={() => setSelected(null)} style={{ color: P.muted }}
-                                                className="hover:opacity-70 transition">
-                                                <BsXLg size={14} />
-                                            </button>
-                                        </div>
-                                        <div className="rounded-xl p-5 mb-4 max-h-[200px] overflow-y-auto"
-                                            style={{ background: P.card, border: `1px solid ${P.border}`, backgroundImage: `repeating-linear-gradient(transparent,transparent 27px,${P.line} 27px,${P.line} 28px)`, backgroundPositionY: "12px" }}>
-                                            <p className="leading-7 whitespace-pre-wrap text-sm"
-                                                style={{ color: P.text, fontFamily: "'Georgia', serif" }}>
-                                                {selectedJournal.content}
-                                            </p>
-                                        </div>
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <span className="text-xs shrink-0" style={{ color: P.muted }}>Điểm</span>
-                                            <span className={`text-base font-bold shrink-0 ${m.text}`}>{selectedJournal.score}</span>
-                                            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: P.card }}>
-                                                <div className={`h-full rounded-full ${m.bar}`} style={{ width: `${selectedJournal.score}%` }} />
-                                            </div>
-                                        </div>
-                                        {selectedJournal.summary && (
-                                            <div className="rounded-xl p-4" style={{ background: "#fef9ec", border: "1px solid #e8d5a0" }}>
-                                                <p className="text-xs font-semibold mb-2 flex items-center gap-1.5" style={{ color: "#92701a" }}>
-                                                    <BsStars size={11} /> AI phân tích
-                                                </p>
-                                                <p className="text-sm leading-6" style={{ color: "#6b5320", fontFamily: "'Georgia', serif" }}>
-                                                    {selectedJournal.summary}
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            );
-                        })()}
-                    </div>
-                </div>
-            )}
+            <ModalDetail
+                selectedJournal={selectedJournal}
+                detailLoading={detailLoading}
+                onClose={() => setSelected(null)}
+            />
         </div>
     );
 }
