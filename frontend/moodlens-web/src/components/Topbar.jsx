@@ -23,11 +23,11 @@ export default function Topbar({ onMenuClick }) {
                     <span className="text-xl">🧠</span>
                     <div>
                         <span className="font-bold text-sm"
-                              style={{ color: P.accent, fontFamily:"'Georgia', serif" }}>
+                              style={{ color: P.accent, fontFamily:"'Caveat', serif" }}>
                             MoodLens
                         </span>
                         <span className="hidden sm:inline text-xs italic ml-2"
-                              style={{ color: P.muted, fontFamily:"'Georgia', serif" }}>
+                              style={{ color: P.muted, fontFamily:"'Caveat', serif" }}>
                             Listen To Your Mind
                         </span>
                     </div>

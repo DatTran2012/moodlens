@@ -69,7 +69,7 @@ const WritePanel = memo(({
                 }} />
             <div className="relative p-4 sm:p-6 pl-7 sm:pl-9">
                 <div className="text-xs font-medium mb-4 tracking-wide pb-3"
-                    style={{ color: P.muted, borderBottom: `1px solid ${P.border}`, fontFamily: "'Georgia', serif" }}>
+                    style={{ color: P.muted, borderBottom: `1px solid ${P.border}`, fontFamily: "'Caveat', serif" }}>
                     📅 {todayStr()}
                 </div>
                 <textarea
@@ -79,7 +79,7 @@ const WritePanel = memo(({
                     onKeyDown={handleKeyDown}
                     placeholder={"Hôm nay bạn cảm thấy thế nào?\n\nHãy viết tự do — không có gì là đúng hay sai..."}
                     className="w-full h-[260px] sm:h-[360px] resize-none bg-transparent outline-none leading-8 text-[15px]"
-                    style={{ color: P.text, fontFamily: "'Georgia', serif", caretColor: P.accent }}
+                    style={{ color: P.text, fontFamily: "'Caveat', serif", caretColor: P.accent }}
                 />
                 <div className="flex items-center justify-between mt-2 text-xs" style={{ color: P.muted }}>
                     <span>{wordCount} từ</span>
@@ -99,7 +99,7 @@ const WritePanel = memo(({
         {/* Nhật kí gần đây */}
         <div className="mt-6">
             <h3 className="text-xs font-bold uppercase tracking-widest mb-3"
-                style={{ color: P.muted, fontFamily: "'Georgia', serif" }}>Gần đây</h3>
+                style={{ color: P.muted, fontFamily: "'Caveat', serif" }}>Gần đây</h3>
             {recentJournals.length === 0
                 ? <p className="text-sm text-center py-6" style={{ color: P.muted }}>Chưa có nhật kí nào</p>
                 : (
@@ -111,7 +111,7 @@ const WritePanel = memo(({
                                     className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition hover:brightness-95 ${m.bg} ${m.border}`}>
                                     <span className="text-lg mt-0.5">{m.emoji}</span>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-sm truncate" style={{ color: P.text, fontFamily: "'Georgia', serif" }}>
+                                        <p className="text-sm truncate" style={{ color: P.text, fontFamily: "'Caveat', serif" }}>
                                             {j.content.length > 70 ? j.content.slice(0, 70) + "..." : j.content}
                                         </p>
                                         <p className="text-xs mt-1" style={{ color: P.muted }}>
@@ -137,10 +137,10 @@ const ResultPanel = memo(({ result, loading, displaySummary }) => {
             <div className={`rounded-2xl p-5 border transition-all duration-500 ${mood ? `${mood.bg} ${mood.border}` : ""}`}
                 style={!mood ? { background: P.surface, border: `1px solid ${P.border}` } : {}}>
                 <p className="text-xs font-bold uppercase tracking-widest mb-2"
-                    style={{ color: P.muted, fontFamily: "'Georgia', serif" }}>Cảm xúc</p>
+                    style={{ color: P.muted, fontFamily: "'Caveat', serif" }}>Cảm xúc</p>
                 {result
                     ? <div className={`text-2xl font-bold flex items-center gap-2 ${mood.text}`}
-                        style={{ fontFamily: "'Georgia', serif" }}>
+                        style={{ fontFamily: "'Caveat', serif" }}>
                         <span>{mood.emoji}</span>
                         <span className="capitalize">{result.mood}</span>
                     </div>
@@ -151,8 +151,8 @@ const ResultPanel = memo(({ result, loading, displaySummary }) => {
             {/* Điểm số */}
             <div className="rounded-2xl p-5" style={{ background: P.surface, border: `1px solid ${P.border}` }}>
                 <p className="text-xs font-bold uppercase tracking-widest mb-3"
-                    style={{ color: P.muted, fontFamily: "'Georgia', serif" }}>Điểm cảm xúc</p>
-                <div className="text-4xl font-bold mb-4" style={{ color: P.text, fontFamily: "'Georgia', serif" }}>
+                    style={{ color: P.muted, fontFamily: "'Caveat', serif" }}>Điểm cảm xúc</p>
+                <div className="text-4xl font-bold mb-4" style={{ color: P.text, fontFamily: "'Caveat', serif" }}>
                     {result ? result.score : <span style={{ color: P.border }}>—</span>}
                 </div>
                 <div className="relative">
@@ -176,14 +176,14 @@ const ResultPanel = memo(({ result, loading, displaySummary }) => {
             <div className="rounded-2xl p-5 min-h-[180px]"
                 style={{ background: "#fef9ec", border: "1px solid #e8d5a0" }}>
                 <p className="text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2"
-                    style={{ color: "#92701a", fontFamily: "'Georgia', serif" }}>
+                    style={{ color: "#92701a", fontFamily: "'Caveat', serif" }}>
                     <BsStars size={13} className="text-yellow-600" /> AI phân tích
                 </p>
                 {loading
                     ? <SkeletonCard />
                     : result
                         ? <p className="leading-7 whitespace-pre-wrap text-[14px]"
-                            style={{ color: "#6b5320", fontFamily: "'Georgia', serif" }}>
+                            style={{ color: "#6b5320", fontFamily: "'Caveat', serif" }}>
                             {displaySummary}
                         </p>
                         : <p className="text-sm" style={{ color: "#b8975a" }}>
@@ -233,7 +233,7 @@ const ModalDetail = memo(({ selectedJournal, detailLoading, onClose }) => {
                             </div>
                             <div className="rounded-xl p-5 mb-4 max-h-[200px] overflow-y-auto"
                                 style={{ background: P.card, border: `1px solid ${P.border}`, backgroundImage: `repeating-linear-gradient(transparent,transparent 27px,${P.line} 27px,${P.line} 28px)`, backgroundPositionY: "12px" }}>
-                                <p className="leading-7 whitespace-pre-wrap text-sm" style={{ color: P.text, fontFamily: "'Georgia', serif" }}>
+                                <p className="leading-7 whitespace-pre-wrap text-sm" style={{ color: P.text, fontFamily: "'Caveat', serif" }}>
                                     {selectedJournal.content}
                                 </p>
                             </div>
@@ -249,7 +249,7 @@ const ModalDetail = memo(({ selectedJournal, detailLoading, onClose }) => {
                                     <p className="text-xs font-semibold mb-2 flex items-center gap-1.5" style={{ color: "#92701a" }}>
                                         <BsStars size={11} /> AI phân tích
                                     </p>
-                                    <p className="text-sm leading-6" style={{ color: "#6b5320", fontFamily: "'Georgia', serif" }}>
+                                    <p className="text-sm leading-6" style={{ color: "#6b5320", fontFamily: "'Caveat', serif" }}>
                                         {selectedJournal.summary}
                                     </p>
                                 </div>
@@ -348,7 +348,7 @@ export default function Journal() {
                     <div className="flex items-center gap-3 mb-1">
                         <BsPencilFill size={20} style={{ color: P.accent }} />
                         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight"
-                            style={{ fontFamily: "'Georgia', serif", color: P.text }}>
+                            style={{ fontFamily: "'Caveat', serif", color: P.text }}>
                             Nhật kí của tôi
                         </h1>
                     </div>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using MoodLens.Application.Interfaces;
 using MoodLens.Domain.Entities;
 using MoodLens.Persistence.Context;
 using System;
@@ -9,13 +10,18 @@ public class MoodSnapshotService
 {
     private readonly MoodLensDbContext _db;
     private readonly IFileStorageService _storage;
+    private readonly IOllamaAiService _ollamaAi;
+
+
 
     public MoodSnapshotService(
         MoodLensDbContext db,
-        IFileStorageService storage)
+        IFileStorageService storage,
+        IOllamaAiService ollamaAi)
     {
         _db = db;
         _storage = storage;
+        _ollamaAi = ollamaAi;
     }
 
     public async Task<MoodSnapshotDto>
@@ -42,15 +48,35 @@ public class MoodSnapshotService
         var imageUrl =
             await _storage.SaveAsync(file);
 
+        using var ms =
+    new MemoryStream();
+
+        await file.CopyToAsync(ms);
+
+        var imageBase64 =
+            Convert.ToBase64String(
+                ms.ToArray());
+
+        var aiResult =
+    await _ollamaAi
+        .AnalyzeSnapshot(
+            imageBase64,
+            request.Caption,
+            request.Mood);
+
         var snapshot =
-            new MoodSnapshot
+            new MoodSnapshotDto
             {
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 ImageUrl = imageUrl,
                 Mood = request.Mood,
                 Caption = request.Caption,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                AiEmotion = aiResult.Emotion,
+                AiScore = aiResult.Confidence,
+                AiInsight = aiResult.Insight,
+                AiReflection = aiResult.Reflection
             };
 
         _db.MoodSnapshots.Add(snapshot);

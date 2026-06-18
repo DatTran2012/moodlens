@@ -44,7 +44,7 @@ const ChatPanel = memo(({
              style={{ borderBottom:`1px solid ${P.border}` }}>
             <AiAvatar isThinking={loading} />
             <div className="flex-1 min-w-0">
-                <h2 className="font-bold text-sm" style={{ color:P.text, fontFamily:"'Georgia', serif" }}>
+                <h2 className="font-bold text-sm" style={{ color:P.text, fontFamily:"'Caveat', serif" }}>
                     MoodLens AI
                 </h2>
                 <p className="text-xs" style={{ color:P.muted }}>
@@ -83,7 +83,7 @@ const ChatPanel = memo(({
                     <div className="max-w-[82%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap"
                          style={msg.role === "user"
                              ? { background:`linear-gradient(135deg,${P.accent},#5c3d20)`, color:"white", borderTopRightRadius:4 }
-                             : { background:P.card, border:`1px solid ${P.border}`, color:P.text, borderTopLeftRadius:4, fontFamily:"'Georgia', serif" }
+                             : { background:P.card, border:`1px solid ${P.border}`, color:P.text, borderTopLeftRadius:4, fontFamily:"'Caveat', serif" }
                          }>
                         {msg.content}
                     </div>
@@ -126,7 +126,7 @@ const ChatPanel = memo(({
                     rows={2}
                     placeholder="Nhập câu hỏi... (Enter để gửi)"
                     className="flex-1 rounded-xl px-4 py-3 resize-none outline-none text-sm transition"
-                    style={{ background:P.card, border:`1px solid ${P.border}`, color:P.text, fontFamily:"'Georgia', serif" }}
+                    style={{ background:P.card, border:`1px solid ${P.border}`, color:P.text, fontFamily:"'Caveat', serif" }}
                 />
                 <button onClick={askAI} disabled={loading || !question.trim()}
                         className="w-11 h-11 rounded-xl flex items-center justify-center text-white shrink-0 transition hover:opacity-90 disabled:opacity-40"
@@ -154,7 +154,7 @@ const RightPanel = memo(({
             </button>
 
             <h3 className="text-xs font-bold uppercase tracking-wider mb-3"
-                style={{ color:P.muted, fontFamily:"'Georgia', serif" }}>Lịch sử</h3>
+                style={{ color:P.muted, fontFamily:"'Caveat', serif" }}>Lịch sử</h3>
 
             <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
                 {conversations.length === 0
@@ -195,7 +195,7 @@ const RightPanel = memo(({
         <div className="rounded-2xl p-4"
              style={{ background:P.surface, border:`1px solid ${P.border}`, boxShadow:"0 2px 12px rgba(139,110,80,0.06)" }}>
             <h3 className="text-xs font-bold uppercase tracking-wider mb-4"
-                style={{ color:P.muted, fontFamily:"'Georgia', serif" }}>📊 Tổng quan cảm xúc</h3>
+                style={{ color:P.muted, fontFamily:"'Caveat', serif" }}>📊 Tổng quan cảm xúc</h3>
             <div className="space-y-3">
                 {insightConfig.map(({ key, emoji, label, barColor }) => {
                     const val   = insight?.[key] ?? 0;

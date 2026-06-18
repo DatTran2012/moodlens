@@ -56,11 +56,11 @@ export default function Login() {
                 <div className="text-center mb-8">
                     <div className="text-5xl mb-3">🧠</div>
                     <h1 className="text-2xl font-bold"
-                        style={{ color: P.accent, fontFamily:"'Georgia', serif" }}>
+                        style={{ color: P.accent, fontFamily:"'Caveat', serif" }}>
                         MoodLens
                     </h1>
                     <p className="text-sm mt-1 italic"
-                       style={{ color: P.muted, fontFamily:"'Georgia', serif" }}>
+                       style={{ color: P.muted, fontFamily:"'Caveat', serif" }}>
                         Listen To Your Mind
                     </p>
                 </div>
@@ -86,7 +86,7 @@ export default function Login() {
 
                     <div className="relative p-6">
                         <h2 className="text-lg font-semibold mb-5"
-                            style={{ color: P.text, fontFamily:"'Georgia', serif" }}>
+                            style={{ color: P.text, fontFamily:"'Caveat', serif" }}>
                             Đăng nhập
                         </h2>
 

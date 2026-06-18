@@ -164,11 +164,11 @@ export default function JournalDetail() {
                             style={{ borderBottom: `1px solid ${P.border}` }}>
                             <div>
                                 <p className="text-xs uppercase tracking-widest mb-0.5"
-                                    style={{ color: P.muted, fontFamily: "'Georgia', serif" }}>
+                                    style={{ color: P.muted, fontFamily: "'Caveat', serif" }}>
                                     Nhật kí
                                 </p>
                                 <p className="text-sm font-medium capitalize leading-snug"
-                                    style={{ color: P.text, fontFamily: "'Georgia', serif" }}>
+                                    style={{ color: P.text, fontFamily: "'Caveat', serif" }}>
                                     {createdAt.toLocaleDateString("vi-VN", {
                                         weekday: "long", year: "numeric", month: "long", day: "numeric"
                                     })}
@@ -195,7 +195,7 @@ export default function JournalDetail() {
                                     autoFocus
                                     className="w-full min-h-[220px] sm:min-h-[280px] bg-transparent outline-none
                                                leading-8 text-[15px] resize-none"
-                                    style={{ color: P.text, fontFamily: "'Georgia', serif", caretColor: P.accent }}
+                                    style={{ color: P.text, fontFamily: "'Caveat', serif", caretColor: P.accent }}
                                     placeholder="Viết lại nhật kí..."
                                 />
                                 <div className="text-xs mt-1 text-right" style={{ color: P.muted }}>
@@ -204,7 +204,7 @@ export default function JournalDetail() {
                             </div>
                         ) : (
                             <p className="leading-8 whitespace-pre-wrap text-[15px] min-h-[140px]"
-                                style={{ color: P.text, fontFamily: "'Georgia', serif" }}>
+                                style={{ color: P.text, fontFamily: "'Caveat', serif" }}>
                                 {item.content}
                             </p>
                         )}
@@ -218,11 +218,11 @@ export default function JournalDetail() {
                     <div className="rounded-2xl p-4"
                         style={{ background: P.surface, border: `1px solid ${P.border}` }}>
                         <p className="text-xs uppercase tracking-wider mb-3"
-                            style={{ color: P.muted, fontFamily: "'Georgia', serif" }}>
+                            style={{ color: P.muted, fontFamily: "'Caveat', serif" }}>
                             Điểm cảm xúc
                         </p>
                         <div className="flex items-end gap-2 mb-3">
-                            <span className="text-3xl font-bold" style={{ color: P.text, fontFamily: "'Georgia', serif" }}>
+                            <span className="text-3xl font-bold" style={{ color: P.text, fontFamily: "'Caveat', serif" }}>
                                 {score}
                             </span>
                             <span className={`text-xs font-medium mb-1 ${mood.color}`}>
@@ -248,11 +248,11 @@ export default function JournalDetail() {
                     <div className="rounded-2xl p-4"
                         style={{ background: "#fef9ec", border: "1px solid #e8d5a0" }}>
                         <p className="text-xs uppercase tracking-wider mb-2 flex items-center gap-1.5"
-                            style={{ color: "#92701a", fontFamily: "'Georgia', serif" }}>
+                            style={{ color: "#92701a", fontFamily: "'Caveat', serif" }}>
                             <BsStars size={12} className="text-yellow-600" /> AI phân tích
                         </p>
                         <p className="leading-6 whitespace-pre-wrap text-sm"
-                            style={{ color: "#6b5320", fontFamily: "'Georgia', serif" }}>
+                            style={{ color: "#6b5320", fontFamily: "'Caveat', serif" }}>
                             {item.summary || "Chưa có phân tích"}
                         </p>
                     </div>

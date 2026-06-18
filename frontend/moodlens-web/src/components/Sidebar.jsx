@@ -38,12 +38,12 @@ export default function Sidebar({ onClose }) {
                     <div className="flex items-center gap-2">
                         <span className="text-2xl">🧠</span>
                         <span className="font-bold text-lg"
-                            style={{ color: P.accent, fontFamily: "'Georgia', serif" }}>
+                            style={{ color: P.accent, fontFamily: "'Caveat', serif" }}>
                             MoodLens
                         </span>
                     </div>
                     <p className="text-xs mt-0.5 ml-8 italic"
-                        style={{ color: P.muted, fontFamily: "'Georgia', serif" }}>
+                        style={{ color: P.muted, fontFamily: "'Caveat', serif" }}>
                         Listen To Your Mind
                     </p>
                 </div>

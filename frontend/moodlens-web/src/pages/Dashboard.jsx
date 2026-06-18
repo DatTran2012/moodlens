@@ -42,7 +42,7 @@ const Skeleton = ({ className }) => (
 // ── Tiêu đề section ───────────────────────────────────────────────────────────
 const SectionTitle = ({ children }) => (
     <h2 className="text-xs font-bold uppercase tracking-widest mb-4"
-        style={{ color: P.muted, fontFamily: "'Georgia', serif" }}>
+        style={{ color: P.muted, fontFamily: "'Caveat', serif" }}>
         {children}
     </h2>
 );
@@ -116,7 +116,7 @@ function JournalModal({ journal, onClose }) {
                             backgroundPositionY: "12px"
                         }}>
                         <p className="leading-7 whitespace-pre-wrap text-sm"
-                            style={{ color: P.text, fontFamily: "'Georgia', serif" }}>
+                            style={{ color: P.text, fontFamily: "'Caveat', serif" }}>
                             {journal.content}
                         </p>
                     </div>
@@ -239,7 +239,7 @@ export default function Dashboard() {
                         MoodLens · Nhật kí cảm xúc
                     </p>
                     <h1 className="text-2xl md:text-3xl font-bold mb-1 text-white"
-                        style={{ fontFamily: "'Georgia', serif" }}>
+                        style={{ fontFamily: "'Caveat', serif" }}>
                         👋 Xin chào!
                     </h1>
                     <p className="text-sm" style={{ color: "rgba(255,235,200,0.75)" }}>
@@ -357,7 +357,7 @@ export default function Dashboard() {
                                 <span className="text-xl mt-0.5 shrink-0">{m.emoji}</span>
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm leading-relaxed line-clamp-2"
-                                        style={{ color: P.text, fontFamily: "'Georgia', serif" }}>
+                                        style={{ color: P.text, fontFamily: "'Caveat', serif" }}>
                                         {j.content}
                                     </p>
                                     <p className={`text-xs mt-2 ${m.text}`}>
@@ -439,7 +439,7 @@ export default function Dashboard() {
                 style={{ background: "#fef9ec", border: "1px solid #e8d5a0", boxShadow: "0 2px 12px rgba(139,110,80,0.08)" }}>
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2"
-                        style={{ color: "#92701a", fontFamily: "'Georgia', serif" }}>
+                        style={{ color: "#92701a", fontFamily: "'Caveat', serif" }}>
                         <BsStars size={14} /> Lời khuyên AI tuần này
                     </h2>
                     {isSunday && (
@@ -450,7 +450,7 @@ export default function Dashboard() {
                         </button>
                     )}
                 </div>
-                <p className="leading-7 whitespace-pre-wrap text-sm" style={{ color: "#6b5320", fontFamily: "'Georgia', serif" }}>
+                <p className="leading-7 whitespace-pre-wrap text-sm" style={{ color: "#6b5320", fontFamily: "'Caveat', serif" }}>
                     {data.weeklyInsight || "Chưa có dữ liệu tuần này."}
                 </p>
                 {!isSunday && (

@@ -83,13 +83,13 @@ export default function Welcome() {
                     </div>
 
                     <h1 className="text-4xl sm:text-5xl font-bold mb-4 leading-tight"
-                        style={{ color: P.text, fontFamily:"'Georgia', serif" }}>
+                        style={{ color: P.text, fontFamily:"'Caveat', serif" }}>
                         Xin chào đến với{" "}
                         <span style={{ color: P.accent }}>MoodLens</span>
                     </h1>
 
                     <p className="text-lg max-w-xl mx-auto leading-relaxed italic"
-                       style={{ color: P.muted, fontFamily:"'Georgia', serif" }}>
+                       style={{ color: P.muted, fontFamily:"'Caveat', serif" }}>
                         Theo dõi cảm xúc, hiểu bản thân và phát triển mỗi ngày cùng AI.
                     </p>
 
@@ -126,7 +126,7 @@ export default function Welcome() {
                                     {f.icon}
                                 </div>
                                 <h3 className="font-bold mb-1 text-base"
-                                    style={{ color: P.text, fontFamily:"'Georgia', serif" }}>
+                                    style={{ color: P.text, fontFamily:"'Caveat', serif" }}>
                                     {f.title}
                                 </h3>
                                 <p className="text-sm leading-relaxed"
@@ -151,13 +151,13 @@ export default function Welcome() {
                         style={{
                             background: `linear-gradient(135deg, ${P.spine}, ${P.accent})`,
                             boxShadow: "0 8px 24px rgba(124,92,58,0.30)",
-                            fontFamily:"'Georgia', serif",
+                            fontFamily:"'Caveat', serif",
                         }}
                     >
                         🚀 Bắt đầu ngay
                     </button>
 
-                    <p className="mt-4 text-sm italic" style={{ color: P.muted, fontFamily:"'Georgia', serif" }}>
+                    <p className="mt-4 text-sm italic" style={{ color: P.muted, fontFamily:"'Caveat', serif" }}>
                         Listen To Your Mind
                     </p>
                 </motion.div>

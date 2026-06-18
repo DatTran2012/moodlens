@@ -1,5 +1,7 @@
-﻿using MoodLens.Application.Interfaces;
+﻿using Microsoft.AspNetCore.Http;
+using MoodLens.Application.Interfaces;
 using MoodLens.Domain.Entities;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -12,6 +14,8 @@ public class OllamaAiService : IOllamaAiService
     private const string Model_Analyic = "gemma4:e4b";
     //private const string Model_Analyic = "gemma4:e4b";
     private const string Model = "gemma4:31b-cloud";
+    //private const string Model = "qwen3.5:0.8b";
+
 
 
     public OllamaAiService(HttpClient http)
@@ -76,6 +80,51 @@ public class OllamaAiService : IOllamaAiService
             throw new Exception("Ollama /api/chat không trả về 'message.content': " + json);
 
         return contentProp.GetString() ?? "";
+    }
+
+    // ─── Single-turn: dùng /api/generate cho SnapShoot ─────── ─────── ───────
+    private async Task<string> AskOllamaVision(
+    string prompt,
+    string imageBase64)
+    
+    {
+        var request = new
+        {
+            model = Model,
+            prompt,
+            images = new[]
+            {
+            imageBase64
+        },
+            stream = false,
+            num_predict = 512,
+            num_ctx = 4096
+        };
+
+        Console.WriteLine(
+            $"Vision Model: {Model}");
+
+        var response =
+            await _http.PostAsJsonAsync(
+                $"{BaseUrl}/api/generate",
+                request);
+
+        var json =
+            await response.Content
+                .ReadAsStringAsync();
+
+        var doc =
+            JsonDocument.Parse(json);
+
+        if (!doc.RootElement.TryGetProperty(
+                "response",
+                out var responseProp))
+        {
+            throw new Exception(
+                "Ollama Vision không trả response");
+        }
+
+        return responseProp.GetString() ?? "";
     }
 
     // ─── Phân tích mood từ nhật ký ───────────────────────────────────────────
@@ -243,5 +292,83 @@ Cách trả lời:
             return input.Substring(startIndex, endIndex - startIndex + 1);
 
         return "";
+    }
+
+    public async Task<SnapshotAnalysis>
+        AnalyzeSnapshot(
+            string imageBase64,
+            string? caption,
+            string? mood)
+    {
+        var prompt = $$"""
+Bạn là AI Emotion Analyst của MoodLens.
+
+Nhiệm vụ:
+
+Phân tích cảm xúc tổng thể của người dùng dựa trên:
+
+1. Hình ảnh
+2. Caption
+3. Mood do người dùng chọn
+
+Caption:
+
+{{caption}}
+
+Mood User:
+
+{{mood}}
+
+Quy tắc:
+
+- Chỉ tập trung vào cảm xúc.
+- Không nhận diện người.
+- Không mô tả ngoại hình.
+- Không suy đoán bệnh lý.
+- Không kết luận chắc chắn.
+- Chỉ đánh giá cảm xúc thể hiện trong khoảnh khắc này.
+
+Emotion chỉ được chọn:
+
+happy
+calm
+sad
+angry
+motivated
+
+Score:
+
+0-100
+
+Insight:
+
+Tối đa 40 từ.
+
+Reflection:
+
+Tối đa 80 từ.
+Giọng văn như nhật ký cá nhân.
+
+Chỉ trả JSON:
+
+{
+    "Emotion":"",
+    "Score":0,
+    "Insight":"",
+    "Reflection":""
+}
+""";
+
+        var result =
+            await AskOllamaVision(
+                prompt,
+                imageBase64);
+
+        var extracted =
+            ExtractJson(result);
+
+        return JsonSerializer.Deserialize<
+            SnapshotAnalysis>(
+            extracted)!;
     }
 }

@@ -68,7 +68,7 @@ export default function JournalHistory() {
             {/* HEADER */}
             <div className="mb-8">
                 <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3"
-                    style={{ fontFamily:"'Georgia', serif" }}>
+                    style={{ fontFamily:"'Caveat', serif" }}>
                     <BsCalendar3 size={24} style={{ color: P.accent }} />
                     Hành trình cảm xúc
                 </h1>
@@ -131,7 +131,7 @@ export default function JournalHistory() {
                                 <div className="w-2.5 h-2.5 rounded-full shrink-0"
                                      style={{ background: P.accent }} />
                                 <span className="text-sm font-bold capitalize tracking-wide"
-                                      style={{ color: P.accent, fontFamily:"'Georgia', serif" }}>
+                                      style={{ color: P.accent, fontFamily:"'Caveat', serif" }}>
                                     {dateLabel}
                                 </span>
                                 <div className="flex-1 h-px" style={{ background: P.border }} />
@@ -186,7 +186,7 @@ export default function JournalHistory() {
 
                                                     {/* Content */}
                                                     <p className="text-sm leading-relaxed mb-3"
-                                                       style={{ color: P.text, fontFamily:"'Georgia', serif" }}>
+                                                       style={{ color: P.text, fontFamily:"'Caveat', serif" }}>
                                                         {truncate(item.content, 160)}
                                                     </p>
 
@@ -199,7 +199,7 @@ export default function JournalHistory() {
                                                                 <BsStars size={11} /> AI Summary
                                                             </p>
                                                             <p className="text-xs leading-relaxed"
-                                                               style={{ color:"#6b5320", fontFamily:"'Georgia', serif" }}>
+                                                               style={{ color:"#6b5320", fontFamily:"'Caveat', serif" }}>
                                                                 {truncate(item.summary, 120)}
                                                             </p>
                                                         </div>

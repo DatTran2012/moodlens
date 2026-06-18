@@ -52,7 +52,7 @@ export default function Music() {
         <div className="min-h-screen p-4 sm:p-8" style={{ background: P.bg, color: P.text }}>
             {/* HEADER */}
             <div className="mb-6">
-                <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3" style={{ fontFamily: "'Georgia', serif" }}>
+                <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3" style={{ fontFamily: "'Caveat', serif" }}>
                     <BsMusicNoteBeamed size={24} style={{ color: P.accent }} /> Âm nhạc
                 </h1>
                 <p className="mt-1 ml-9 text-sm" style={{ color: P.muted }}>

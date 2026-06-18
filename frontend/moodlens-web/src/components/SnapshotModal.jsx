@@ -46,6 +46,18 @@ export default function SnapshotModal({
         );
     };
 
+    const resetForm = () => {
+        setFile(null);
+        setPreview("");
+        setMood("Happy");
+        setCaption("");
+    };
+
+    const handleClose = () => {
+        resetForm();
+        onClose();
+    };
+
     const handleSubmit = async () => {
         if (!file) {
             alert("Vui lòng chọn ảnh");
@@ -53,22 +65,34 @@ export default function SnapshotModal({
         }
 
         try {
-            const formData = new FormData();
+            const formData =
+                new FormData();
 
-            formData.append("file", file);
-            formData.append("mood", mood);
-            formData.append("caption", caption);
+            formData.append(
+                "file",
+                file
+            );
 
-            await createSnapshot(formData);
+            formData.append(
+                "mood",
+                mood
+            );
 
-            setFile(null);
-            setPreview("");
-            setCaption("");
-            setMood("Happy");
+            formData.append(
+                "caption",
+                caption
+            );
 
-            onClose();
+            await createSnapshot(
+                formData
+            );
+
+            handleClose();
         } catch (error) {
-            alert(error.message);
+            alert(
+                error.message ||
+                    "Có lỗi xảy ra"
+            );
         }
     };
 
@@ -78,23 +102,36 @@ export default function SnapshotModal({
         <AnimatePresence>
             <motion.div
                 className="
-          fixed
-          inset-0
-          z-50
-          flex
-          items-center
-          justify-center
-          bg-black/50
-          p-4
-        "
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                    fixed
+                    inset-0
+                    z-50
+                    bg-black/50
+                    backdrop-blur-sm
+                    flex
+                    items-center
+                    justify-center
+                    p-4
+                "
+                initial={{
+                    opacity: 0,
+                }}
+                animate={{
+                    opacity: 1,
+                }}
+                exit={{
+                    opacity: 0,
+                }}
+                onClick={
+                    handleClose
+                }
             >
                 <motion.div
+                    onClick={(e) =>
+                        e.stopPropagation()
+                    }
                     initial={{
                         opacity: 0,
-                        scale: 0.9,
+                        scale: 0.95,
                         y: 20,
                     }}
                     animate={{
@@ -104,15 +141,18 @@ export default function SnapshotModal({
                     }}
                     exit={{
                         opacity: 0,
-                        scale: 0.9,
+                        scale: 0.95,
                     }}
                     className="
-            w-full
-            max-w-xl
-            rounded-3xl
-            shadow-xl
-            overflow-hidden
-          "
+                        w-full
+                        max-w-2xl
+                        max-h-[90vh]
+                        rounded-3xl
+                        shadow-2xl
+                        overflow-hidden
+                        flex
+                        flex-col
+                    "
                     style={{
                         background:
                             COLORS.bg,
@@ -120,46 +160,68 @@ export default function SnapshotModal({
                 >
                     {/* Header */}
                     <div
-                        className="p-6"
+                        className="
+                            px-6
+                            py-4
+                            flex
+                            items-center
+                            justify-between
+                        "
                         style={{
                             background:
                                 COLORS.card,
                         }}
                     >
-                        <h2 className="text-2xl font-bold">
-                            📸 New Snapshot
-                        </h2>
+                        <div>
+                            <h2 className="text-xl font-bold text-[#3b2f1e]">
+                                📸 New Snapshot
+                            </h2>
 
-                        <p className="opacity-70 mt-1">
-                            Lưu lại cảm xúc hôm nay
-                        </p>
+                            <p className="text-sm opacity-70">
+                                Ghi lại cảm xúc
+                                của hôm nay
+                            </p>
+                        </div>
+
+                        <button
+                            onClick={
+                                handleClose
+                            }
+                            className="
+                                w-10
+                                h-10
+                                rounded-xl
+                                hover:bg-black/5
+                                transition
+                            "
+                        >
+                            ✕
+                        </button>
                     </div>
 
                     {/* Body */}
-                    <div className="p-6 space-y-6">
-
+                    <div
+                        className="
+                            p-5
+                            overflow-y-auto
+                            space-y-5
+                        "
+                    >
                         {/* Upload */}
                         <div>
-                            <label
-                                className="
-                  block
-                  text-sm
-                  font-medium
-                  mb-2
-                "
-                            >
+                            <label className="block font-medium mb-2">
                                 Hình ảnh
                             </label>
 
                             <label
                                 className="
-                  cursor-pointer
-                  block
-                  border-2
-                  border-dashed
-                  rounded-2xl
-                  p-4
-                "
+                                    block
+                                    cursor-pointer
+                                    border-2
+                                    border-dashed
+                                    rounded-3xl
+                                    overflow-hidden
+                                "
                                 style={{
                                     borderColor:
                                         COLORS.border,
@@ -177,31 +239,32 @@ export default function SnapshotModal({
                                 {!preview ? (
                                     <div
                                         className="
-                      h-64
-                      flex
-                      flex-col
-                      items-center
-                      justify-center
-                    "
+                                            h-48
+                                            flex
+                                            flex-col
+                                            items-center
+                                            justify-center
+                                        "
                                     >
-                                        <div className="text-6xl">
+                                        <div className="text-5xl">
                                             📷
                                         </div>
 
-                                        <p className="mt-3 opacity-70">
+                                        <p className="mt-3 text-gray-500">
                                             Chọn ảnh
                                         </p>
                                     </div>
                                 ) : (
                                     <img
-                                        src={preview}
+                                        src={
+                                            preview
+                                        }
                                         alt="preview"
                                         className="
-                      w-full
-                      h-64
-                      object-cover
-                      rounded-xl
-                    "
+                                            w-full
+                                            h-60
+                                            object-cover
+                                        "
                                     />
                                 )}
                             </label>
@@ -209,56 +272,58 @@ export default function SnapshotModal({
 
                         {/* Mood */}
                         <div>
-                            <label
-                                className="
-                  block
-                  text-sm
-                  font-medium
-                  mb-3
-                "
-                            >
+                            <label className="block font-medium mb-3">
                                 Mood
                             </label>
 
                             <div
                                 className="
-                  flex
-                  flex-wrap
-                  gap-3
-                "
+                                    flex
+                                    flex-wrap
+                                    gap-3
+                                "
                             >
                                 {moods.map(
-                                    (item) => (
+                                    (
+                                        item
+                                    ) => (
                                         <button
-                                            key={item.value}
+                                            key={
+                                                item.value
+                                            }
                                             onClick={() =>
                                                 setMood(
                                                     item.value
                                                 )
                                             }
                                             className="
-                        px-4
-                        py-2
-                        rounded-full
-                        transition
-                      "
+                                                px-4
+                                                py-2.5
+                                                rounded-full
+                                                transition-all
+                                                text-sm
+                                                font-medium
+                                            "
                                             style={{
                                                 background:
                                                     mood ===
-                                                        item.value
+                                                    item.value
                                                         ? COLORS.accent
                                                         : COLORS.surface,
 
                                                 color:
                                                     mood ===
-                                                        item.value
+                                                    item.value
                                                         ? "#fff"
                                                         : COLORS.text,
                                             }}
                                         >
-                                            {item.emoji}
-                                            {" "}
-                                            {item.value}
+                                            {
+                                                item.emoji
+                                            }{" "}
+                                            {
+                                                item.value
+                                            }
                                         </button>
                                     )
                                 )}
@@ -267,82 +332,112 @@ export default function SnapshotModal({
 
                         {/* Caption */}
                         <div>
-                            <label
-                                className="
-                  block
-                  text-sm
-                  font-medium
-                  mb-2
-                "
-                            >
+                            <label className="block font-medium mb-2">
                                 Caption
                             </label>
 
                             <textarea
-                                rows={4}
-                                value={caption}
-                                onChange={(e) =>
+                                rows={3}
+                                maxLength={
+                                    200
+                                }
+                                value={
+                                    caption
+                                }
+                                onChange={(
+                                    e
+                                ) =>
                                     setCaption(
-                                        e.target.value
+                                        e
+                                            .target
+                                            .value
                                     )
                                 }
                                 placeholder="Hôm nay bạn cảm thấy thế nào..."
                                 className="
-                  w-full
-                  rounded-2xl
-                  p-4
-                  outline-none
-                  resize-none
-                "
+                                    w-full
+                                    rounded-2xl
+                                    p-4
+                                    resize-none
+                                    outline-none
+                                "
                                 style={{
                                     background:
                                         COLORS.surface,
                                 }}
                             />
+
+                            <div
+                                className="
+                                    mt-2
+                                    text-right
+                                    text-xs
+                                    text-gray-400
+                                "
+                            >
+                                {
+                                    caption.length
+                                }
+                                /200
+                            </div>
                         </div>
                     </div>
 
                     {/* Footer */}
                     <div
                         className="
-              flex
-              justify-end
-              gap-3
-              p-6
-            "
+                            px-6
+                            py-4
+                            flex
+                            justify-end
+                            gap-3
+                            border-t
+                        "
                         style={{
                             background:
                                 COLORS.card,
+                            borderColor:
+                                COLORS.border,
                         }}
                     >
                         <button
-                            onClick={onClose}
+                            onClick={
+                                handleClose
+                            }
                             className="
-                px-5
-                py-2
-                rounded-xl
-              "
+                                px-5
+                                py-2.5
+                                rounded-xl
+                                hover:bg-black/5
+                                transition
+                            "
                         >
-                            Cancel
+                            Hủy
                         </button>
 
                         <button
-                            disabled={loading}
-                            onClick={handleSubmit}
+                            disabled={
+                                loading
+                            }
+                            onClick={
+                                handleSubmit
+                            }
                             className="
-                px-5
-                py-2
-                rounded-xl
-                text-white
-              "
+                                px-5
+                                py-2.5
+                                rounded-xl
+                                text-white
+                                font-medium
+                                disabled:opacity-50
+                            "
                             style={{
                                 background:
                                     COLORS.accent,
                             }}
                         >
                             {loading
-                                ? "Saving..."
-                                : "Save Snapshot"}
+                                ? "Đang lưu..."
+                                : "Lưu Snapshot"}
                         </button>
                     </div>
                 </motion.div>
@@ -350,4 +445,3 @@ export default function SnapshotModal({
         </AnimatePresence>
     );
 }
-

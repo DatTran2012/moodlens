@@ -12,6 +12,14 @@ public class MoodSnapshot
 
     public string? Caption { get; set; }
 
+    public string? AiEmotion { get; set; }
+
+    public int? AiScore { get; set; }
+
+    public string? AiInsight { get; set; }
+
+    public string? AiReflection { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public User User { get; set; } = null!;
